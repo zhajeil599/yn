@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统管理 - 原型</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #fff; 
+        }
+
+        /* 页面内容区域样式 */
+        .page-content {
+            padding: 24px;
+            background-color: #fff;
+            flex-grow: 1;
+            overflow-y: auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .content-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border: none;
+            background-color: #1890ff;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 16px;
+        }
+
+        .btn-refresh {
+            cursor: pointer;
+            color: #1890ff;
+            font-size: 20px;
+        }
+
+        /* 表格样式 */
+        .table-container {
+            border: 1px solid #e8e8e8;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 16px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        th {
+            background-color: #fafafa;
+            color: #595959;
+            font-weight: 500;
+        }
+
+        td {
+            color: #8c8c8c;
+        }
+
+        .btn-modify {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border: none;
+            background-color: #1890ff;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* 分页样式 */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-top: 24px;
+            color: #8c8c8c;
+        }
+
+        .pagination-item {
+            padding: 6px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+
+        .pagination-item.active {
+            color: #1890ff;
+            border-color: #1890ff;
+        }
+
+        .pagination-info {
+            margin-left: 16px;
+        }
+
+        .page-select, .page-input {
+            padding: 6px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            color: #595959;
+        }
+
+        .page-input {
+            width: 40px;
+            text-align: center;
+            margin: 0 4px;
+        }
+
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            width: 1100px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #595959;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .modal-close-icon {
+            cursor: pointer;
+            color: #8c8c8c;
+            font-size: 20px;
+        }
+
+        .modal-body {
+            padding: 24px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .form-item {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-label {
+            width: 150px;
+            color: #595959;
+            text-align: right;
+            margin-right: 16px;
+        }
+
+        .required::before {
+            content: '*';
+            color: #ff4d4f;
+            margin-right: 4px;
+        }
+
+        .form-input-container {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .form-input, .form-select, textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            color: #595959;
+            box-sizing: border-box;
+        }
+
+        .form-input-with-icon {
+            display: flex;
+            align-items: center;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .form-input-with-icon .form-input {
+            border: none;
+            flex-grow: 1;
+        }
+
+        .form-icon {
+            background-color: #fafafa;
+            color: #bfbfbf;
+            padding: 8px;
+            border-left: 1px solid #d9d9d9;
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .form-range {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .range-input {
+            width: 150px;
+        }
+
+        /* 模态框表格 */
+        .modal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+
+        .modal-table th, .modal-table td {
+            padding: 8px;
+            border: 1px solid #e8e8e8;
+            text-align: center;
+        }
+
+        .modal-table th {
+            background-color: #fafafa;
+        }
+
+        .modal-table input {
+            border: none;
+            width: 100%;
+            flex-grow: 1;
+            text-align: center;
+            outline: none;
+            padding: 8px 0;
+        }
+
+        .modal-table-icon {
+            color: #595959;
+            width: 30px;
+            text-align: center;
+        }
+
+        .dynamic-radio {
+            display: flex; 
+            align-items: center; 
+            gap: 4px;
+            color: #bfbfbf;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .dynamic-radio:has(input:checked) {
+            color: #1890ff;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e8e8e8;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .btn-cancel {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border: 1px solid #d9d9d9;
+            background-color: #fff;
+            color: #595959;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border: none;
+            background-color: #1890ff;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    
+        /* 提现方式配置表格样式 */
+        .withdraw-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0;
+        }
+        .withdraw-table th, .withdraw-table td {
+            padding: 8px;
+            border: 1px solid #e8e8e8;
+            text-align: center;
+            color: #595959;
+            font-size: 14px;
+        }
+        .withdraw-table th {
+            background-color: #fafafa;
+            font-weight: 500;
+        }
+        .withdraw-table .form-select, .withdraw-table .form-input {
+            padding: 4px 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .withdraw-table .status-radios {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            white-space: nowrap;
+        }
+        .withdraw-table .status-radios label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            white-space: nowrap;
+            margin: 0;
+        }
+    
+        /* 拖拽排序样式 */
+        .draggable-row {
+            cursor: grab;
+            transition: background-color 0.2s;
+        }
+        .draggable-row:active {
+            cursor: grabbing;
+        }
+        .draggable-row.dragging {
+            opacity: 0.8;
+            background-color: #e6f7ff !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .drag-handle {
+            cursor: grab;
+            color: #bfbfbf;
+            margin-right: 4px;
+            font-size: 16px;
+        }
+        .sort-number {
+            font-weight: bold;
+            color: #1890ff;
+            display: inline-block;
+            width: 20px;
+        }
+        
+        .help-icon {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            line-height: 14px;
+            text-align: center;
+            border-radius: 50%;
+            background-color: #bfbfbf;
+            color: #fff;
+            font-size: 11px;
+            cursor: help;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <!-- 页面内容区域 -->
+    <div class="page-content">
+        <div class="content-header">
+            <div>
+                <button class="btn-add" id="btnAdd">新增</button>
+            </div>
+            <div class="btn-refresh">&#8635;</div>
+        </div>
+
+        <!-- 数据表格 -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>状态</th>
+                        <th>备注</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>12</td>
+                        <td>VIP1-VIP3 基础层级模板</td>
+                        <td>正常</td>
+                        <td>适用于低风险的普通会员，基础提现额度与手续费配置。</td>
+                        <td><button class="btn-modify">修改</button></td>
+                    </tr>
+                    <tr>
+                        <td>123</td>
+                        <td>VIP4-VIP7 高星级专属模板</td>
+                        <td>正常</td>
+                        <td>适用于高净值且无异常行为的用户，享有大额提现免审核及低手续费特权。</td>
+                        <td><button class="btn-modify">修改</button></td>
+                    </tr>
+                    <tr>
+                        <td>141</td>
+                        <td>风控预警-高风险限制模板</td>
+                        <td>正常</td>
+                        <td>触发高频提现或异常IP登录的用户，限制单次提现额度，强制开启高额手续费。</td>
+                        <td><button class="btn-modify">修改</button></td>
+                    </tr>
+                    <tr>
+                        <td>154</td>
+                        <td>疑似套利-极高风险模板</td>
+                        <td>正常</td>
+                        <td>针对打水、套利等极高风险标签用户，限制提现次数并提高提款稽核。</td>
+                        <td><button class="btn-modify">修改</button></td>
+                    </tr>
+                    <tr>
+                        <td>155</td>
+                        <td>新注册未实名-观察期模板</td>
+                        <td>正常</td>
+                        <td>新注册首周或未完成高级认证的用户，提现额度降级，需人工复核。</td>
+                        <td><button class="btn-modify">修改</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页栏 -->
+        <div class="pagination">
+            <span class="pagination-info">共 5 条</span>
+            <select class="page-select">
+                <option>50条/页</option>
+            </select>
+            <div class="pagination-item"></div>
+            <div class="pagination-item active">1</div>
+            <div class="pagination-item">></div>
+            <span class="pagination-info">前往</span>
+            <input type="text" class="page-input" value="1">
+            <span class="pagination-info">页</span>
+            <button class="btn-submit" style="padding: 4px 10px; margin-left: 8px;">确认</button>
+        </div>
+    </div>
+
+    <!-- 添加弹窗 -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">添加</span>
+                <span class="modal-close-icon" id="modalCloseIcon">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-item">
+                        <label class="form-label required">模板名称:</label>
+                        <div class="form-input-container">
+                            <input type="text" class="form-input" placeholder="请输入模板名称">
+                        </div>
+                    </div>
+
+                    <table class="modal-table">
+                        <thead>
+                            <tr>
+                                <th>稽核种类</th>
+                                <th>线上存款</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>充值稽核</td>
+                                <td>
+                                    <div class="form-input-with-icon">
+                                        <input type="text" placeholder="请输入充值稽核值">
+                                        <span class="modal-table-icon form-icon">%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>优惠稽核</td>
+                                <td>
+                                    <div class="form-input-with-icon">
+                                        <input type="text" placeholder="请输入优惠稽核值">
+                                        <span class="modal-table-icon form-icon">%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="form-item">
+                        <label class="form-label">提现配置:</label>
+                        <div class="form-input-container">
+                            <table class="withdraw-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 6%">排序</th>
+                                        <th style="width: 8%">提现方式</th>
+                                        <th style="width: 14%">状态</th>
+                                        <th style="width: 12%">手续费类型</th>
+                                        <th style="width: 10%">手续费</th>
+                                        <th style="width: 24%">单次限额 (下限-上限)</th>
+                                        <th style="width: 10%">次数限制<span class="help-icon" title="以自然日为周期的提现次数限制（进行中+成功状态），填0则不限制。">?</span></th>
+                                        <th style="width: 16%">超限提示文案</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <script>
+                                        const methods = ['银行卡', '支付宝', '钱包', 'USDT'];
+                                        methods.forEach((method, index) => {
+                                            document.write(`
+                                                <tr class="draggable-row" draggable="true">
+                                                    <td>
+                                                        <span class="drag-handle">☰</span>
+                                                        <span class="sort-number">${index + 1}</span>
+                                                    </td>
+                                                    <td>${method}</td>
+                                                    <td>
+                                                        <div class="status-radios">
+                                                            <label class="dynamic-radio"><input type="radio" name="add_status_${index}" checked> 启用</label>
+                                                            <label class="dynamic-radio"><input type="radio" name="add_status_${index}"> 禁用</label>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-select">
+                                                            <option>固定金额</option>
+                                                            <option>百分比</option>
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="text" class="form-input" placeholder="费率/金额"></td>
+                                                    <td>
+                                                        <div class="form-range" style="justify-content: center;">
+                                                            <input type="text" class="form-input range-input" style="width: 70px;" placeholder="下限">
+                                                            <span>-</span>
+                                                            <input type="text" class="form-input range-input" style="width: 70px;" placeholder="上限">
+                                                        </div>
+                                                    </td>
+                                                    <td><input type="text" class="form-input" placeholder="次"></td>
+                                                    <td><input type="text" class="form-input" placeholder="请输入超限提示文案"></td>
+                                                </tr>
+                                            `);
+                                        });
+                                    </script>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="form-item">
+                        <label class="form-label">状态:</label>
+                        <div class="form-input-container" style="display: flex; gap: 20px;">
+                            <label class="dynamic-radio">
+                                <input type="radio" name="add_status_main" checked> 启用
+                            </label>
+                            <label class="dynamic-radio">
+                                <input type="radio" name="add_status_main"> 禁用
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-item">
+                        <label class="form-label">提现说明:</label>
+                        <div class="form-input-container">
+                            <textarea placeholder="请输入提现说明" maxlength="500"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-item">
+                        <label class="form-label">备注:</label>
+                        <div class="form-input-container">
+                            <textarea placeholder="请输入备注"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" id="modalCloseBtn">关闭</button>
+                <button class="btn-submit">提交</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改弹窗 -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">修改</span>
+                <span class="modal-close-icon" id="editModalCloseIcon">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-item">
+                        <label class="form-label required">模板名称:</label>
+                        <div class="form-input-container">
+                            <input type="text" class="form-input" value="VIP1-VIP3 基础层级模板">
+                        </div>
+                    </div>
+
+                    <table class="modal-table">
+                        <thead>
+                            <tr>
+                                <th>稽核种类</th>
+                                <th>线上存款</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>充值稽核</td>
+                                <td>
+                                    <div class="form-input-with-icon">
+                                        <input type="text" value="100">
+                                        <span class="modal-table-icon form-icon">%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>优惠稽核</td>
+                                <td>
+                                    <div class="form-input-with-icon">
+                                        <input type="text" value="200">
+                                        <span class="modal-table-icon form-icon">%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="form-item">
+                        <label class="form-label">提现配置:</label>
+                        <div class="form-input-container">
+                            <table class="withdraw-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 6%">排序</th>
+                                        <th style="width: 8%">提现方式</th>
+                                        <th style="width: 14%">状态</th>
+                                        <th style="width: 12%">手续费类型</th>
+                                        <th style="width: 10%">手续费</th>
+                                        <th style="width: 24%">单次限额 (下限-上限)</th>
+                                        <th style="width: 10%">次数限制<span class="help-icon" title="以自然日为周期的提现次数限制（进行中+成功状态），填0则不限制。">?</span></th>
+                                        <th style="width: 16%">超限提示文案</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <script>
+                                        const editMethods = ['银行卡', '支付宝', '钱包', 'USDT'];
+                                        editMethods.forEach((method, index) => {
+                                            const isChecked = method === '支付宝' ? '' : 'checked';
+                                            const isUnchecked = method === '支付宝' ? 'checked' : '';
+                                            document.write(`
+                                                <tr class="draggable-row" draggable="true">
+                                                    <td>
+                                                        <span class="drag-handle">☰</span>
+                                                        <span class="sort-number">${index + 1}</span>
+                                                    </td>
+                                                    <td>${method}</td>
+                                                    <td>
+                                                        <div class="status-radios">
+                                                            <label class="dynamic-radio"><input type="radio" name="edit_status_${index}" ${isChecked}> 启用</label>
+                                                            <label class="dynamic-radio"><input type="radio" name="edit_status_${index}" ${isUnchecked}> 禁用</label>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-select">
+                                                            <option>固定金额</option>
+                                                            <option selected>百分比</option>
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="text" class="form-input" value="1.50"></td>
+                                                    <td>
+                                                        <div class="form-range" style="justify-content: center;">
+                                                            <input type="text" class="form-input range-input" style="width: 70px;" value="1.00">
+                                                            <span>-</span>
+                                                            <input type="text" class="form-input range-input" style="width: 70px;" value="10000.00">
+                                                        </div>
+                                                    </td>
+                                                    <td><input type="text" class="form-input" value="5"></td>
+                                                    <td><input type="text" class="form-input" value="当前取款方式取款次数超限"></td>
+                                                </tr>
+                                            `);
+                                        });
+                                    </script>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="form-item">
+                        <label class="form-label">状态:</label>
+                        <div class="form-input-container" style="display: flex; gap: 20px;">
+                            <label class="dynamic-radio">
+                                <input type="radio" name="status_main" checked> 启用
+                            </label>
+                            <label class="dynamic-radio">
+                                <input type="radio" name="status_main"> 禁用
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-item">
+                        <label class="form-label">提现说明:</label>
+                        <div class="form-input-container">
+                            <textarea placeholder="请输入提现说明" maxlength="500">这里是默认提现说明</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-item">
+                        <label class="form-label">备注:</label>
+                        <div class="form-input-container">
+                            <textarea>适用于低风险的普通会员，基础提现额度与手续费配置。</textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" id="editModalCloseBtn">关闭</button>
+                <button class="btn-submit">提交</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 弹窗通用控制方法
+        const openModal = (modalElement) => {
+            modalElement.style.display = 'flex';
+        };
+        const closeModal = (modalElement) => {
+            modalElement.style.display = 'none';
+        };
+
+        // 添加弹窗逻辑控制
+        const btnAdd = document.getElementById('btnAdd');
+        const addModal = document.getElementById('addModal');
+        const addModalCloseIcon = document.getElementById('modalCloseIcon');
+        const addModalCloseBtn = document.getElementById('modalCloseBtn');
+        const addModalSubmitBtn = addModal.querySelector('.btn-submit'); 
+
+        btnAdd.addEventListener('click', () => openModal(addModal));
+        addModalCloseIcon.addEventListener('click', () => closeModal(addModal));
+        addModalCloseBtn.addEventListener('click', () => closeModal(addModal));
+        addModalSubmitBtn.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            closeModal(addModal);
+        });
+
+        // 修改弹窗逻辑控制
+        const btnModifies = document.querySelectorAll('.btn-modify');
+        const editModal = document.getElementById('editModal');
+        const editModalCloseIcon = document.getElementById('editModalCloseIcon');
+        const editModalCloseBtn = document.getElementById('editModalCloseBtn');
+        const editModalSubmitBtn = editModal.querySelector('.btn-submit'); 
+
+        btnModifies.forEach(btn => {
+            btn.addEventListener('click', () => openModal(editModal));
+        });
+        editModalCloseIcon.addEventListener('click', () => closeModal(editModal));
+        editModalCloseBtn.addEventListener('click', () => closeModal(editModal));
+        editModalSubmitBtn.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            closeModal(editModal);
+        });
+
+        // 点击弹窗外部阴影区域关闭
+        window.addEventListener('click', (e) => {
+            if (e.target === addModal) closeModal(addModal);
+            if (e.target === editModal) closeModal(editModal);
+        });
+
+        // 表格拖拽排序交互逻辑
+        const initDragAndDrop = () => {
+            const tbodies = document.querySelectorAll('.withdraw-table tbody');
+            
+            tbodies.forEach(tbody => {
+                let draggingRow = null;
+
+                tbody.addEventListener('dragstart', function(e) {
+                    draggingRow = e.target.closest('tr');
+                    if (draggingRow) {
+                        draggingRow.classList.add('dragging');
+                        e.dataTransfer.setData('text/plain', ''); 
+                        e.dataTransfer.effectAllowed = 'move';
+                    }
+                });
+
+                tbody.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    const targetRow = e.target.closest('tr');
+                    
+                    if (targetRow && targetRow !== draggingRow && targetRow.classList.contains('draggable-row')) {
+                        const bounding = targetRow.getBoundingClientRect();
+                        const offset = bounding.y + (bounding.height / 2);
+                        if (e.clientY - offset > 0) {
+                            targetRow.after(draggingRow);
+                        } else {
+                            targetRow.before(draggingRow);
+                        }
+                    }
+                });
+
+                tbody.addEventListener('dragend', function(e) {
+                    if (draggingRow) {
+                        draggingRow.classList.remove('dragging');
+                        draggingRow = null;
+                        
+                        // 重新计算序号
+                        const rows = tbody.querySelectorAll('tr.draggable-row');
+                        rows.forEach((row, index) => {
+                            const sortNum = row.querySelector('.sort-number');
+                            if (sortNum) sortNum.textContent = index + 1;
+                        });
+                    }
+                });
+            });
+        };
+        // 执行拖拽初始化
+        initDragAndDrop();
+    </script>
+</body>
+</html>
