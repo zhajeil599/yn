@@ -1,0 +1,795 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>1、产品界面过于复杂，导致用户找不到重点，如何优化提升易用性？请结合案例说明</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+/* For default-background callouts, render the border outline. */
+.callout.block-color-default_background {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+/*
+ * Toggles and callouts hold arbitrary content, so they can easily be taller
+ * than a page. They must stay breakable: avoiding breaks inside them makes
+ * Chromium push the whole block onto the next page, which leaves the previous
+ * page mostly empty before every long toggle.
+ */
+details,
+aside {
+	margin: 1.25em 0;
+}
+
+/* Keep a toggle's title on the same page as the start of its content. */
+summary {
+	page-break-after: avoid;
+	break-after: avoid;
+}
+
+/*
+ * Toggle headings render as <h1/h2/h3 style="display:inline-block"> inside
+ * <summary>. Without this reset, the heading's margin-top pushes it below the
+ * ::marker (▼), so the triangle and the title appear on separate lines.
+ */
+summary h1,
+summary h2,
+summary h3,
+summary h4 {
+	margin-top: 0;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+
+	table.collection-content {
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	table.collection-content th,
+	table.collection-content td {
+		overflow-wrap: anywhere;
+	}
+
+	table.collection-content td > .user,
+	table.collection-content td > time {
+		white-space: pre-wrap;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content-wrapper {
+	overflow-x: auto;
+}
+
+@media only print {
+	.collection-content-wrapper {
+		overflow-x: visible;
+	}
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	gap: 46px;
+}
+
+.column {
+	min-width: 0;
+	overflow: hidden;
+}
+
+.column > *:first-child {
+	margin-top: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding-inline: 0.125rem;
+	padding-block: 0.375rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+table {
+	border-collapse: collapse;
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol.numbered-list.numbered-list-digits-2 {
+	padding-inline-start: 2em;
+}
+
+ol.numbered-list.numbered-list-digits-3plus {
+	padding-inline-start: 2.4em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+/*
+ * Render emoji icons using a ::before pseudo-element to keep the glyph
+ * out of the DOM textContent traversal. This avoids double-rendering icons
+ * in callouts and page titles.
+ * NOTE(slim/html-export-pseudo-icons): I can't tagref this because it will
+ * flag as a duplicate tag after codegen.
+ */
+.icon[data-emoji]::before {
+	content: attr(data-emoji);
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	margin-right: 0.4em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.tab {
+	margin: 1.25em 0;
+	padding-inline: 1rem;
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style><style>@import url('https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex-swap.min.css')</style></head><body><article id="3dba24a6-4884-80d4-9912-d2162e4aefff" class="page sans"><header><h1 class="page-title" dir="auto">1、产品界面过于复杂，导致用户找不到重点，如何优化提升易用性？请结合案例说明</h1><p class="page-description" dir="auto"></p></header><div class="page-body"><p id="3dba24a6-4884-805e-b3c6-dd492eebd4ee" class="" dir="auto"><strong>以下为结合最近一份工作经历作答：</strong></p><h2 id="3dba24a6-4884-80ea-b4d4-cc80039f5e48" class="" dir="auto">一、先判断“复杂”来自哪里</h2><p id="3dba24a6-4884-80a1-a442-c28a188f425e" class="" dir="auto">产品界面复杂，通常不是单纯因为功能多，而是因为<strong>赛事、玩法、活动、账户、充值、公告等信息同时抢占用户注意力</strong>，导致用户不知道当前页面的重点是什么。</p><table id="3dba24a6-4884-804d-86ed-e3b1a6c07625" class="simple-table" dir="ltr"><thead class="simple-table-header"><tr id="3dba24a6-4884-80d9-82b3-d5104d1e60d9" dir="ltr"><th id="dnVG" class="simple-table-header-color simple-table-header">问题来源</th><th id="t&gt;Jc" class="simple-table-header-color simple-table-header">具体表现</th><th id="Wtq]" class="simple-table-header-color simple-table-header">对用户的影响</th></tr></thead><tbody><tr id="3dba24a6-4884-809b-9f00-e55a707688a0" dir="ltr"><td id="dnVG" class="">信息太多</td><td id="t&gt;Jc" class="">首页同时展示赛事列表、赔率、活动 Banner、公告、游戏入口、客服、下载 App、充值入口等</td><td id="Wtq]" class="">用户第一眼不知道该先看赛事、注册，还是点活动</td></tr><tr id="3dba24a6-4884-807d-9290-e6f715fb58c8" dir="ltr"><td id="dnVG" class="">视觉层级混乱</td><td id="t&gt;Jc" class="">登录注册、热门赛事、优惠活动、公告、客服浮窗都使用强提醒样式</td><td id="Wtq]" class="">所有元素都很抢眼，真正重要的操作反而不突出</td></tr><tr id="3dba24a6-4884-80fe-82d3-c67c026b8067" dir="ltr"><td id="dnVG" class="">功能入口堆叠</td><td id="t&gt;Jc" class="">体育、真人、电子、棋牌、彩票、电竞、优惠、VIP、代理、任务中心等全部放在导航或首页</td><td id="Wtq]" class="">新用户不知道从哪里开始，老用户也要花时间找常用入口</td></tr><tr id="3dba24a6-4884-8035-9483-f5d67dfbbb1a" dir="ltr"><td id="dnVG" class="">赛事信息过密</td><td id="t&gt;Jc" class="">一场比赛下直接展开多种盘口、玩法、赔率和标签</td><td id="Wtq]" class="">用户很难快速找到自己关注的比赛和玩法</td></tr><tr id="3dba24a6-4884-80c6-9c3d-ec6ea84e0063" dir="ltr"><td id="dnVG" class="">任务流程过长</td><td id="t&gt;Jc" class="">从浏览赛事到登录、注册、充值、确认操作，需要多次跳转或反复弹窗</td><td id="Wtq]" class="">用户容易中途流失，关键操作完成率下降</td></tr><tr id="3dba24a6-4884-8043-9db8-cec81cdc8a5a" dir="ltr"><td id="dnVG" class="">文案不清晰</td><td id="t&gt;Jc" class="">大量使用“豪礼来袭”“尊享特权”“立即参与”等营销话术</td><td id="Wtq]" class="">用户不知道点击后会发生什么，也不清楚活动规则</td></tr><tr id="3dba24a6-4884-8015-9134-d30b006b04b5" dir="ltr"><td id="dnVG" class="">反馈与引导不足</td><td id="t&gt;Jc" class="">余额不足、投注失败、充值处理中、赔率变化等状态提示不明显</td><td id="Wtq]" class="">用户不知道问题出在哪里，也不知道下一步该怎么处理</td></tr></tbody></table><hr id="3dba24a6-4884-8043-aba3-cefeed46303a" dir="auto"/><h2 id="3dba24a6-4884-8089-809b-ed15cafd7878" class="" dir="auto">二、优化思路：从“功能堆叠”转为“用户路径导向”</h2><p id="3dba24a6-4884-8082-8ca5-d1a155d89bec" class="" dir="auto">产品界面不应该只是把所有业务入口都摆出来，而是要围绕用户的核心路径来组织页面。也就是说，页面重点不是展示“我们有什么”，而是帮助用户完成“他现在想做什么”。</p><p id="3dba24a6-4884-8083-b97a-f49f940abf31" class="" dir="auto">例如：</p><table id="3dba24a6-4884-8045-93cd-f7b919a529c3" class="simple-table" dir="ltr"><thead class="simple-table-header"><tr id="3dba24a6-4884-80f4-b44e-e1cbf270f52e" dir="ltr"><th id="{j\&gt;" class="simple-table-header-color simple-table-header">功能堆叠式设计</th><th id="s]Se" class="simple-table-header-color simple-table-header">用户路径导向设计</th></tr></thead><tbody><tr id="3dba24a6-4884-80ad-a0da-ce005c7a601b" dir="ltr"><td id="{j\&gt;" class="">体育、真人、电子、棋牌、彩票、电竞、优惠、VIP、代理全部并列展示</td><td id="s]Se" class="">先突出体育赛事、热门游戏和登录注册，低频入口放到更多或个人中心</td></tr><tr id="3dba24a6-4884-8081-ade3-fc95883fc333" dir="ltr"><td id="{j\&gt;" class="">首页堆满 Banner、公告、活动、推荐游戏、下载 App</td><td id="s]Se" class="">首页优先展示热门赛事、正在进行、常用分类和账户入口</td></tr><tr id="3dba24a6-4884-8097-97ee-f44c62fddab8" dir="ltr"><td id="{j\&gt;" class="">一场比赛默认展开所有盘口和玩法</td><td id="s]Se" class="">默认展示核心盘口，更多玩法折叠，需要时再展开</td></tr><tr id="3dba24a6-4884-80b7-8356-d38f06d062a5" dir="ltr"><td id="{j\&gt;" class="">未登录用户一进来就弹活动、App 下载、注册优惠</td><td id="s]Se" class="">未登录状态重点引导登录/注册，也允许先浏览赛事</td></tr><tr id="3dba24a6-4884-80b6-9ec5-f46c68bfde5e" dir="ltr"><td id="{j\&gt;" class="">已登录用户仍然被大量活动信息干扰</td><td id="s]Se" class="">已登录状态优先展示余额、充值、提现、记录、消息等账户相关操作</td></tr><tr id="3dba24a6-4884-8083-802b-ff880462fd7c" dir="ltr"><td id="{j\&gt;" class="">按业务模块分类：优惠、任务、VIP、代理、活动中心</td><td id="s]Se" class="">按用户目的分类：看赛事、找玩法、管理账户、查看记录、联系客服</td></tr></tbody></table><p id="3dba24a6-4884-80a3-aaf9-d096e96a6488" class="" dir="auto">优化时可以先问三个问题：</p><table id="3dba24a6-4884-80d0-939f-c23a425cb5c5" class="simple-table" dir="ltr"><thead class="simple-table-header"><tr id="3dba24a6-4884-8080-9c63-ce0dbe48ebe2" dir="ltr"><th id="]mpz" class="simple-table-header-color simple-table-header">问题</th><th id="W`|[" class="simple-table-header-color simple-table-header">在产品界面中的对应思考</th></tr></thead><tbody><tr id="3dba24a6-4884-8003-ae9d-c639ac202a33" dir="ltr"><td id="]mpz" class="">用户来到这个页面，最主要的目标是什么？</td><td id="W`|[" class="">是看比赛、找盘口、进入游戏、登录注册，还是管理账户？</td></tr><tr id="3dba24a6-4884-800b-8be6-e7b007e74b75" dir="ltr"><td id="]mpz" class="">用户完成目标所需的最少信息是什么？</td><td id="W`|[" class="">看赛事时是否只需要联赛、时间、队伍、比分、核心赔率？其他玩法是否可以折叠？</td></tr><tr id="3dba24a6-4884-80c4-8f51-e7614157d42b" dir="ltr"><td id="]mpz" class="">哪些内容可以延后、隐藏、折叠或放到二级页面？</td><td id="W`|[" class="">活动 Banner、VIP、代理、规则说明、低频玩法、下载 App 是否可以下沉？</td></tr></tbody></table><h2 id="3dba24a6-4884-8041-b8ed-fe9fa60c0d1e" class="" dir="auto">三、具体优化方案</h2><h3 id="3dba24a6-4884-8073-b58f-e9bdb865b77d" class="" dir="auto">1. 首页信息不要全部堆在首屏</h3><table id="3dba24a6-4884-8072-85ab-f9b563256f04" class="simple-table" dir="ltr"><thead class="simple-table-header"><tr id="3dba24a6-4884-802b-be3a-fcadba596f40" dir="ltr"><th id="BxR&gt;" class="simple-table-header-color simple-table-header">优化前</th><th id="R[ud" class="simple-table-header-color simple-table-header">优化后</th></tr></thead><tbody><tr id="3dba24a6-4884-80d7-9441-dd97ad4e1e8d" dir="ltr"><td id="BxR&gt;" class="">首页同时放 Banner、热门赛事、游戏入口、优惠活动、VIP、代理、公告、下载 App、客服悬浮窗等内容</td><td id="R[ud" class="">首屏只保留核心路径：登录/注册、体育/真人/电子主入口、热门赛事或正在进行的比赛</td></tr><tr id="3dba24a6-4884-8062-9701-cec4e2cc323e" dir="ltr"><td id="BxR&gt;" class="">活动和广告占据大量首屏空间</td><td id="R[ud" class="">活动、公告、App 下载放到次级区域或独立页面</td></tr><tr id="3dba24a6-4884-809d-9e73-d08c841865b1" dir="ltr"><td id="BxR&gt;" class="">用户进来后不知道先看赛事、活动还是注册</td><td id="R[ud" class="">用户一进来就能判断：浏览赛事、进入游戏分类，或登录/注册</td></tr></tbody></table><h3 id="3dba24a6-4884-8089-8e09-e198fe5775a7" class="" dir="auto">2. 导航入口按优先级展示</h3><table id="3dba24a6-4884-80a4-9e2a-d0f6c91a8df9" class="simple-table" dir="ltr"><thead class="simple-table-header"><tr id="3dba24a6-4884-8065-b0ae-e0501b1ed0b4" dir="ltr"><th id="v{Qf" class="simple-table-header-color simple-table-header">优化前</th><th id="pz[B" class="simple-table-header-color simple-table-header">优化后</th></tr></thead><tbody><tr id="3dba24a6-4884-800e-b69c-eaf92103ec44" dir="ltr"><td id="v{Qf" class="">顶部导航过长：体育、真人、电子、棋牌、彩票、电竞、优惠、VIP、任务、代理、App、客服等全部露出</td><td id="pz[B" class="">顶部只放高频主入口：体育、真人、电子、优惠、我的</td></tr><tr id="3dba24a6-4884-8002-b5cf-f55d0b177cec" dir="ltr"><td id="v{Qf" class="">低频功能和核心功能并列展示</td><td id="pz[B" class="">代理、规则、帮助、任务、App 下载等放入“更多”或个人中心</td></tr><tr id="3dba24a6-4884-80f0-a9c0-ee61bca7374a" dir="ltr"><td id="v{Qf" class="">用户需要在大量入口中寻找目标</td><td id="pz[B" class="">用户能更快找到主要功能，页面也更清爽</td></tr></tbody></table><h3 id="3dba24a6-4884-80cb-9beb-e3c5a4a0f171" class="" dir="auto">3. 赛事列表突出重点信息</h3><table id="3dba24a6-4884-806f-828d-c0bfb26eb5c2" class="simple-table" dir="ltr"><thead class="simple-table-header"><tr id="3dba24a6-4884-80d1-a5b4-cbf2c71e23fc" dir="ltr"><th id="@cdb" class="simple-table-header-color simple-table-header">优化前</th><th id="\T@i" class="simple-table-header-color simple-table-header">优化后</th></tr></thead><tbody><tr id="3dba24a6-4884-809a-816a-d9ffd4570c8d" dir="ltr"><td id="@cdb" class="">一场比赛下直接展开大量盘口，如胜平负、让球、大小球、角球、波胆、半场等</td><td id="\T@i" class="">默认展示 2–3 个常用盘口，其余放到“更多玩法”</td></tr><tr id="3dba24a6-4884-8095-8342-ffa4bb6ef7b8" dir="ltr"><td id="@cdb" class="">比赛、赔率、活动标签、推荐信息混在一起</td><td id="\T@i" class="">优先展示联赛、时间、主客队、比分状态、核心盘口</td></tr><tr id="3dba24a6-4884-80de-9554-d96b7991478a" dir="ltr"><td id="@cdb" class="">列表信息密度过高，新用户容易被数字淹没</td><td id="\T@i" class="">新用户能先看懂基础信息，老用户也可以展开查看完整玩法</td></tr></tbody></table><h3 id="3dba24a6-4884-80b7-8c03-d0d0c2990f40" class="" dir="auto">4. 视觉层级要控制，不要所有元素都抢眼</h3><table id="3dba24a6-4884-8040-80bc-e61cb4bbbedc" class="simple-table" dir="ltr"><thead class="simple-table-header"><tr id="3dba24a6-4884-807c-9a36-f6cc1a7136e0" dir="ltr"><th id="XW:F" class="simple-table-header-color simple-table-header">优化前</th><th id="wL[L" class="simple-table-header-color simple-table-header">优化后</th></tr></thead><tbody><tr id="3dba24a6-4884-807f-bb41-e24e2d90375e" dir="ltr"><td id="XW:F" class="">红色按钮、金色活动、滚动公告、弹窗、倒计时、悬浮客服同时出现</td><td id="wL[L" class="">主按钮保留一种高亮色，次要按钮弱化处理</td></tr><tr id="3dba24a6-4884-80b8-86fc-e1552fa6e39d" dir="ltr"><td id="XW:F" class="">Banner 和活动信息压过赛事列表</td><td id="wL[L" class="">赛事列表作为页面主体，活动入口下沉或弱提示</td></tr><tr id="3dba24a6-4884-8006-8037-eba5b4d25a7f" dir="ltr"><td id="XW:F" class="">客服、下载条、弹窗遮挡主要内容</td><td id="wL[L" class="">悬浮组件缩小，不遮挡赛事、赔率或投注单</td></tr></tbody></table><h3 id="3dba24a6-4884-8044-a473-f17cfe94f16a" class="" dir="auto">5. 注册、登录、充值路径要清楚</h3><table id="3dba24a6-4884-8014-8fbf-e14b7ed05284" class="simple-table" dir="ltr"><thead class="simple-table-header"><tr id="3dba24a6-4884-80a3-a6fd-d9a5dc18fb17" dir="ltr"><th id="ZR=&gt;" class="simple-table-header-color simple-table-header">优化前</th><th id="O{Qk" class="simple-table-header-color simple-table-header">优化后</th></tr></thead><tbody><tr id="3dba24a6-4884-8081-a93c-d47ce005fedb" dir="ltr"><td id="ZR=&gt;" class="">未登录用户进入后，同时看到注册弹窗、下载 App、优惠活动、充值引导</td><td id="O{Qk" class="">未登录状态重点只保留登录、注册、浏览赛事</td></tr><tr id="3dba24a6-4884-8010-9595-e3cac044c86a" dir="ltr"><td id="ZR=&gt;" class="">已登录用户的余额、充值、提现、记录入口不明显</td><td id="O{Qk" class="">已登录状态优先展示余额、充值、提现、投注记录</td></tr><tr id="3dba24a6-4884-80a7-86e8-e6540ece66a4" dir="ltr"><td id="ZR=&gt;" class="">关键操作入口过多，用户反而不知道点哪个</td><td id="O{Qk" class="">不同状态展示不同重点，减少干扰</td></tr></tbody></table><h3 id="3dba24a6-4884-80f0-b316-f07158bac98f" class="" dir="auto">6. 弹窗和浮层要克制</h3><table id="3dba24a6-4884-80be-819f-c453e2e6e702" class="simple-table" dir="ltr"><thead class="simple-table-header"><tr id="3dba24a6-4884-8045-af68-f6795b403ed6" dir="ltr"><th id="C=?D" class="simple-table-header-color simple-table-header">优化前</th><th id="GxJV" class="simple-table-header-color simple-table-header">优化后</th></tr></thead><tbody><tr id="3dba24a6-4884-80cd-9486-fb9b2e8de3f6" dir="ltr"><td id="C=?D" class="">用户一进首页就弹注册优惠、下载 App、公告、活动等多个弹窗</td><td id="GxJV" class="">首次进入最多保留一个关键弹窗</td></tr><tr id="3dba24a6-4884-803b-8ae8-e93aac130722" dir="ltr"><td id="C=?D" class="">用户浏览赛事或操作时被弹窗打断</td><td id="GxJV" class="">活动提示改为顶部弱提示或活动页入口</td></tr><tr id="3dba24a6-4884-80dc-8a8a-fc21b7e4abe6" dir="ltr"><td id="C=?D" class="">弹窗关闭后短时间内反复出现</td><td id="GxJV" class="">设置合理频率，关闭后不重复打扰</td></tr><tr id="3dba24a6-4884-800d-a704-ceb5effed3a0" dir="ltr"><td id="C=?D" class="">弹窗遮挡投注单或表单</td><td id="GxJV" class="">账户、风险、交易类提示优先级最高，其他弹窗延后</td></tr></tbody></table><h3 id="3dba24a6-4884-80b3-8621-fe2b172cff45" class="" dir="auto">7. 文案少用夸张营销词，多说清楚结果</h3><table id="3dba24a6-4884-8005-b516-cf8f65e6b933" class="simple-table" dir="ltr"><thead class="simple-table-header"><tr id="3dba24a6-4884-805d-b6ed-da00686899ab" dir="ltr"><th id="sm]U" class="simple-table-header-color simple-table-header">优化前</th><th id="r^eP" class="simple-table-header-color simple-table-header">优化后</th></tr></thead><tbody><tr id="3dba24a6-4884-804e-8da3-deeb634ce86d" dir="ltr"><td id="sm]U" class="">“豪礼来袭”“尊享特权”“限时狂欢”“顶级盛宴”大量出现</td><td id="r^eP" class="">改成“新用户活动”“今日可领取”“查看活动规则”</td></tr><tr id="3dba24a6-4884-80b9-b293-e34921fd2479" dir="ltr"><td id="sm]U" class="">按钮写“立即参与”“马上领取”，但用户不知道下一步是什么</td><td id="r^eP" class="">改成“立即注册”“查看赛事”“确认投注”“查看记录”</td></tr><tr id="3dba24a6-4884-8076-a58e-e03f9c1ea4fd" dir="ltr"><td id="sm]U" class="">错误提示只写“操作失败”</td><td id="r^eP" class="">改成“余额不足，请先充值”或“验证码错误，请重新输入”</td></tr></tbody></table><p id="3dba24a6-4884-80f0-ae2b-f7b4dda246cb" class="" dir="auto">
+</p><h1 id="3dba24a6-4884-8011-910c-d5e30c772078" class="" dir="auto">2、请简述充提订单、用户账变的区别和关系，以及BC平台中两者常见的数据源。</h1><h2 id="3dba24a6-4884-80bd-bfd4-e985ec678f61" class="" dir="auto">充提订单记录“业务流程”，用户账变记录“资金变化”。</h2><h2 id="3dba24a6-4884-806b-852a-f5502b1f7e68" class="" dir="auto">区别：</h2><table id="3dba24a6-4884-8094-aa3e-c43a926fd4b0" class="simple-table" dir="ltr"><thead class="simple-table-header"><tr id="3dba24a6-4884-8046-ac3b-f78fd6ffa254" dir="ltr"><th id="xEMQ" class="simple-table-header-color simple-table-header">对比项</th><th id="TmrS" class="simple-table-header-color simple-table-header">充提订单</th><th id="VkYF" class="simple-table-header-color simple-table-header">用户账变</th></tr></thead><tbody><tr id="3dba24a6-4884-80ae-b420-fe85aae64d11" dir="ltr"><td id="xEMQ" class="">定义</td><td id="TmrS" class="">用户充值或提现时产生的业务订单</td><td id="VkYF" class="">用户账户余额发生变化时产生的资金流水</td></tr><tr id="3dba24a6-4884-8058-af41-f571d35e38f3" dir="ltr"><td id="xEMQ" class="">关注重点</td><td id="TmrS" class="">这笔充值/提现现在处理到哪一步</td><td id="VkYF" class="">用户余额为什么增加或减少</td></tr><tr id="3dba24a6-4884-80d7-b85f-ed843395dd8a" dir="ltr"><td id="xEMQ" class="">核心信息</td><td id="TmrS" class="">订单号、用户、金额、币种、状态、通道、三方流水号、创建/完成时间</td><td id="VkYF" class="">账变流水号、用户、账变类型、变动金额、变动前余额、变动后余额、关联业务单号</td></tr><tr id="3dba24a6-4884-80cb-b0c3-ef6a67241043" dir="ltr"><td id="xEMQ" class="">状态特点</td><td id="TmrS" class="">有状态流转，如待支付、处理中、成功、失败、取消</td><td id="VkYF" class="">通常是已经发生的结果记录，一般不做复杂状态流转</td></tr><tr id="3dba24a6-4884-8050-85e1-dda49c009239" dir="ltr"><td id="xEMQ" class="">是否一定影响余额</td><td id="TmrS" class="">不一定，只有成功或特定节点才会影响余额</td><td id="VkYF" class="">一定会影响余额</td></tr><tr id="3dba24a6-4884-8039-999f-cc919628b783" dir="ltr"><td id="xEMQ" class="">覆盖范围</td><td id="TmrS" class="">只覆盖充值、提现</td><td id="VkYF" class="">覆盖所有资金变化，如充值、提现、投注、派奖、活动、返水、人工调整等</td></tr><tr id="3dba24a6-4884-8003-96cf-e480344e0746" dir="ltr"><td id="xEMQ" class="">用户问题场景</td><td id="TmrS" class="">“我的充值/提现到哪一步了？”</td><td id="VkYF" class="">“我的余额为什么变多/变少了？”</td></tr></tbody></table><h2 id="3dba24a6-4884-8052-a061-e964a7ca615e" class="" dir="auto">关系：</h2><table id="3dba24a6-4884-8077-93bc-f9bef847c8a8" class="simple-table" dir="ltr"><thead class="simple-table-header"><tr id="3dba24a6-4884-8089-abf7-c90bc7652e57" dir="ltr"><th id="iUNc" class="simple-table-header-color simple-table-header">场景</th><th id="B=@i" class="simple-table-header-color simple-table-header">充提订单</th><th id="KWD^" class="simple-table-header-color simple-table-header">用户账变</th></tr></thead><tbody><tr id="3dba24a6-4884-802b-98fa-eaafc04661a2" dir="ltr"><td id="iUNc" class="">充值成功</td><td id="B=@i" class="">生成一笔充值订单，状态变为成功</td><td id="KWD^" class="">生成一条加款账变，余额增加</td></tr><tr id="3dba24a6-4884-80c2-8483-dd2ab3125452" dir="ltr"><td id="iUNc" class="">提现申请</td><td id="B=@i" class="">生成一笔提现订单，进入审核或处理中</td><td id="KWD^" class="">可能先扣减余额或冻结余额</td></tr><tr id="3dba24a6-4884-80b3-bc66-c6404c74d7ff" dir="ltr"><td id="iUNc" class="">提现失败</td><td id="B=@i" class="">提现订单状态变为失败</td><td id="KWD^" class="">如果之前已扣款/冻结，需要生成退回或解冻账变</td></tr><tr id="3dba24a6-4884-8021-828d-c22d9cd7b4ae" dir="ltr"><td id="iUNc" class="">提现成功</td><td id="B=@i" class="">提现订单状态变为成功</td><td id="KWD^" class="">生成扣款确认、手续费等账变</td></tr><tr id="3dba24a6-4884-803e-973a-d53ddfca9841" dir="ltr"><td id="iUNc" class="">活动奖励/投注/派奖</td><td id="B=@i" class="">通常没有充提订单</td><td id="KWD^" class="">会产生对应的用户账变</td></tr></tbody></table><h2 id="3dba24a6-4884-808a-9c28-fdf673f8413c" class="" dir="auto"><strong>充提订单是账变的业务来源之一，但账变不只来自充提订单</strong>。</h2><h2 id="3dba24a6-4884-809b-92cf-d5c33139c906" class="" dir="auto"></h2></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
