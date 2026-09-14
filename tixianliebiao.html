@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>提现订单列表</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+            font-size: 13px;
+            color: #606266;
+            margin: 20px;
+            background-color: #f5f7fa;
+        }
+
+        /* 筛选区域样式 */
+        .filter-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+            margin-bottom: 20px;
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-item label {
+            color: #606266;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .filter-input, .filter-select {
+            height: 32px;
+            line-height: 32px;
+            padding: 0 10px;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            color: #606266;
+            outline: none;
+            background-color: #fff;
+            box-sizing: border-box;
+            min-width: 130px;
+        }
+
+        .filter-input:focus, .filter-select:focus {
+            border-color: #409eff;
+        }
+
+        .filter-range {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .filter-range .filter-input {
+            width: 100px;
+            min-width: auto;
+        }
+
+        .filter-date {
+            display: flex;
+            align-items: center;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            padding: 0 10px;
+            height: 32px;
+            background-color: #fff;
+        }
+
+        .filter-date input {
+            border: none;
+            outline: none;
+            height: 100%;
+            text-align: center;
+            color: #606266;
+            background: transparent;
+        }
+
+        .summary-row {
+            color: #303133;
+            font-size: 14px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed #ebeef5;
+        }
+
+        .summary-row span {
+            margin-right: 20px;
+        }
+
+        /* 表格区域样式 */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+            box-sizing: border-box;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            border: 1px solid #ebeef5;
+        }
+
+        th, td {
+            border: 1px solid #ebeef5;
+            padding: 12px 8px;
+            vertical-align: middle;
+            line-height: 1.5;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #909399;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        /* 文本颜色 */
+        .text-green { color: #67c23a; }
+        .text-gray { color: #909399; }
+        .text-blue { color: #409eff; }
+        .text-red { color: #f56c6c; }
+        .text-orange { color: #e6a23c; }
+        .text-left { text-align: left; }
+
+        /* 按钮通用样式 */
+        .btn {
+            display: inline-block;
+            line-height: 1;
+            white-space: nowrap;
+            cursor: pointer;
+            background: #fff;
+            border: 1px solid #dcdfe6;
+            color: #606266;
+            text-align: center;
+            box-sizing: border-box;
+            outline: none;
+            margin: 2px;
+            transition: .1s;
+            font-weight: 500;
+            border-radius: 3px;
+        }
+
+        .btn-primary {
+            color: #fff;
+            background-color: #409eff;
+            border-color: #409eff;
+        }
+        
+        .btn-primary-search {
+            color: #fff;
+            background-color: #409eff;
+            border-color: #409eff;
+            height: 32px;
+            padding: 0 20px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .btn-warning {
+            color: #fff;
+            background-color: #e6a23c;
+            border-color: #e6a23c;
+        }
+
+        .btn-xs {
+            padding: 5px 8px;
+            font-size: 12px;
+        }
+
+        .note-cell {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            min-height: 30px;
+        }
+
+        .operations-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 4px;
+            position: relative;
+        }
+
+        .flash-icon {
+            position: absolute;
+            right: -8px;
+            top: -8px;
+            background-color: #fadb14;
+            color: #000;
+            font-size: 10px;
+            padding: 1px 3px;
+            border-radius: 2px;
+            z-index: 10;
+        }
+    /* 弹窗及交互通用样式（新增） */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fff; margin: 10% auto; padding: 20px 25px; border-radius: 4px; width: 420px; box-shadow: 0 2px 12px 0 rgba(0,0,0,.1); }
+        .modal-header { font-size: 16px; font-weight: bold; margin-bottom: 20px; color: #303133; }
+        .modal-footer { text-align: right; margin-top: 20px; }
+        .form-group { margin-bottom: 15px; display: flex; align-items: flex-start; }
+        .form-group label { width: 80px; text-align: right; margin-right: 15px; margin-top: 5px; color: #606266; }
+        .form-content { flex: 1; display: flex; flex-direction: column; }
+        .form-content textarea { width: 100%; height: 80px; padding: 8px; border: 1px solid #dcdfe6; border-radius: 4px; resize: none; box-sizing: border-box; font-family: inherit; }
+        .form-content select { width: 100%; height: 32px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 10px; }
+        .radio-group { margin-top: 5px; display: flex; gap: 15px; }
+    
+    /* 修复弹窗按钮太小的问题 */
+        .modal-footer .btn { padding: 8px 20px; font-size: 14px; margin-left: 10px; border-radius: 4px; }
+        
+        /* 详情弹窗表格通用样式 */
+        .detail-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px; }
+        .detail-table th, .detail-table td { border: 1px solid #ebeef5; padding: 10px; text-align: left; }
+        .detail-table th { background-color: #f8f9fa; color: #606266; font-weight: bold; width: 12%; white-space: nowrap; }
+        .detail-table td { background-color: #fff; color: #303133; }
+        
+        /* 会员详情复杂布局样式 */
+        .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .info-item { display: flex; align-items: center; }
+        .info-item label { width: 90px; text-align: right; margin-right: 10px; color: #606266; font-weight: 500; font-size: 12px;}
+        .info-item input, .info-item select { flex: 1; height: 28px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 5px; background-color: #f5f7fa; color: #909399;}
+        .info-item input:not([disabled]) { background-color: #fff; color: #303133; }
+        
+        .tab-layout { display: flex; border: 1px solid #ebeef5; min-height: 280px; }
+        .tab-menu { width: 80px; border-right: 1px solid #ebeef5; background: #fff; }
+        .tab-menu-item { padding: 15px 0; text-align: center; cursor: pointer; border-left: 2px solid transparent; }
+        .tab-menu-item.active { color: #409eff; border-left-color: #409eff; background: #f5f7fa; font-weight: bold;}
+        .tab-content { flex: 1; padding: 0; }
+        .tab-table th, .tab-table td { padding: 10px 15px; }
+    
+    /* --- 会员详情及提现备注专用样式 --- */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px 20px; }
+        .form-group-detail { display: flex; align-items: center; }
+        .form-label-detail { width: 100px; text-align: right; font-size: 13px; color: #606266; }
+        .modal-input-detail { flex: 1; padding: 8px 10px; border: 1px solid #dcdfe6; border-radius: 4px; font-size: 13px; background-color: #f5f7fa; color: #909399; }
+        
+        .stats-section { display: flex; border: 1px solid #ebeef5; margin-top: 20px; border-radius: 4px; overflow: hidden; }
+        .stats-tabs { width: 120px; background-color: #f8f9fa; display: flex; flex-direction: column; border-right: 1px solid #ebeef5; }
+        .stats-tab { padding: 12px 0; text-align: center; font-size: 13px; color: #303133; cursor: pointer; border-bottom: 1px solid #ebeef5; }
+        .stats-tab.active { background-color: #409eff; color: #fff; border-bottom-color: #409eff; font-weight: bold; }
+        .stats-content { flex: 1; padding: 0; }
+        .stats-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 0; border: none; }
+        .stats-table td { padding: 12px 15px; border-bottom: 1px solid #ebeef5; border-right: none; border-left: none;}
+        .stats-label { width: 130px; color: #606266; background-color: #f8f9fa; }
+        .stats-value { color: #303133; }
+
+        .tooltip-box { position: relative; display: inline-block; float: right; cursor: pointer; }
+        .tooltip-box .tooltip-text { visibility: hidden; background-color: rgba(0,0,0,0.8); color: #fff; text-align: center; border-radius: 4px; padding: 6px 10px; position: absolute; z-index: 10; bottom: 130%; right: -10px; white-space: nowrap; font-size: 12px; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+        .tooltip-box .tooltip-text::after { content: ""; position: absolute; top: 100%; right: 16px; border-width: 5px; border-style: solid; border-color: rgba(0,0,0,0.8) transparent transparent transparent; }
+        .tooltip-box:hover .tooltip-text { visibility: visible; opacity: 1; }
+    
+    /* 底部翻页组件样式 */
+        .pagination-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 15px;
+            padding-top: 15px;
+            font-size: 14px;
+            color: #606266;
+        }
+        .page-select {
+            padding: 0 10px;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            outline: none;
+            color: #606266;
+            background: #fff;
+            height: 32px;
+            cursor: pointer;
+        }
+        .page-btn {
+            background-color: #f0f7ff; 
+            color: #409eff; 
+            border: 1px solid #e0efff;
+            padding: 0 15px;
+            height: 32px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+        .page-btn:hover {
+            background-color: #409eff;
+            color: #fff;
+        }
+    
+    </style>
+</head>
+<body>
+
+<!-- 顶部筛选区域 -->
+<div class="filter-container">
+    <!-- 将所有的筛选项合并到一个 filter-row 容器中，利用原生的 flex-wrap 自动换行 -->
+    <div class="filter-row" style="margin-bottom: 0;">
+        <div class="filter-item">
+            <label>渠道商</label>
+            <input class="filter-input" placeholder="请选择">
+        </div>
+        <div class="filter-item">
+            <label>用户ID</label>
+            <input class="filter-input" placeholder="请输入用户ID">
+        </div>
+        <div class="filter-item">
+            <label>订单号</label>
+            <input class="filter-input" placeholder="请输入订单号">
+        </div>
+        <div class="filter-item">
+            <label>操作人</label>
+            <input class="filter-input" placeholder="请输入操作人">
+        </div>
+        <div class="filter-item">
+            <label>状态</label>
+            <select class="filter-select">
+                <option value="">请选择</option>
+                <option value="1">申请中</option>
+                <option value="2">代付中</option>
+                <option value="3">成功</option>
+                <option value="4">代付成功</option>
+                <option value="5">失败</option>
+                <option value="6">代付失败</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label>首提</label>
+            <select class="filter-select">
+                <option value="">请选择</option>
+                <option value="1">是</option>
+                <option value="0">否</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label>出款类型</label>
+            <select class="filter-select">
+                <option value="">出款类型</option>
+                <option value="1">人工审核</option>
+                <option value="2">三方代付-银行卡</option>
+                <option value="3">三方代付-钱包</option>
+                <option value="4">三方代付-支付宝</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label>金额</label>
+            <div class="filter-range">
+                <input class="filter-input" placeholder="最低金额"> - <input class="filter-input" placeholder="最高金额">
+            </div>
+        </div>
+        <div class="filter-item">
+            <label>收款方式</label>
+            <select class="filter-select">
+                <option value="">收款方式</option>
+                <option value="1">银行卡</option>
+                <option value="2">USDT</option>
+                <option value="3">支付宝</option>
+                <option value="4">VipPay</option>
+                <option value="5">K豆</option>
+                <option value="6">秒付</option>
+                <option value="7">天天付</option>
+                <option value="8">988钱包</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label>收款账户</label>
+            <input class="filter-input" placeholder="卡号或钱包">
+        </div>
+        <div class="filter-item">
+            <select class="filter-select" style="width: 110px; min-width: 110px;">
+                <option>申请时间</option>
+                <option>结算时间</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <div class="filter-date">
+                <span style="color:#c0c4cc; margin-right:8px;">🕒</span>
+                <input type="text" value="2026-09-14 00:00:00" style="width: 140px;"> - 
+                <input type="text" value="2026-09-14 23:59:59" style="width: 140px;">
+            </div>
+        </div>
+        <!-- 去掉了之前写死的 margin-left，让各项间距保持统一 -->
+        <div class="filter-item">
+            <label>数据更新</label>
+            <select class="filter-select" style="width: 100px; min-width: 100px;">
+                <option>不刷新</option>
+                <option>10秒刷新</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <button class="btn btn-primary-search">查询</button>
+        </div>
+    </div>
+    
+    <div class="summary-row">
+        <span>成功金额:0</span>
+        <span>到账金额:0</span>
+        <span>失败金额:0</span>
+        <span>拒绝金额:0</span>
+        <span>待审核金额:0</span>
+    </div>
+</div>
+
+<!-- 数据表格区域 -->
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>渠道商</th>
+                <th>订单号</th>
+                <th>用户ID</th>
+                <th>首提</th>
+                <th>取款金额</th>
+                <th>用户手续费</th>
+                <th>到账金额</th>
+                <th>币种到账金额</th>
+                <th>金流</th>
+                <th>状态</th>
+                <th>申请时间/结算时间</th>
+                <th style="min-width: 80px;">提现备注</th>
+                <th>操作人</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 行1：USDT + 申请中 -->
+            <tr>
+                <td>官方渠道</td>
+                <td>U20260821182436014545</td>
+                <td>102154884</td>
+                <td class="text-green">是</td>
+                <td>2026</td>
+                <td>0</td>
+                <td>2026</td>
+                <td>294.47 USDT</td>
+                <td class="text-left">
+                    充值:5555<br>提现:0<br>客损:5555
+                </td>
+                <td class="text-orange">申请中</td>
+                <td>2026-09-14 10:24:36<br>2026-09-14 10:24:36</td>
+                <td>
+                    <div style="display: flex; justify-content: space-between; align-items: center; min-width: 120px;">
+                        <span class="remark-text" style="color:#606266; font-size: 12px;">大客户优先处理</span>
+                        <button class="btn btn-primary btn-xs" onclick="openWithdrawRemarkModal(this)">修改</button>
+                    </div>
+                </td>
+                <td>admin_mike</td>
+                <td>
+                    <div class="operations-cell">
+                        <!-- 锁单前（初始状态） -->
+                        <div id="unlocked-state-1" style="display: block;">
+                            <div class="btn-row">
+                                <button class="btn btn-primary btn-xs" onclick="showDetailsModal('USDT')">详情</button>
+                                <button class="btn btn-primary btn-xs" onclick="showModal('userDetailsModal')">会员详情</button>
+                            </div>
+                            <div class="btn-row">
+                                <button class="btn btn-primary btn-xs" onclick="openLockModal(1)">锁单</button>
+                            </div>
+                        </div>
+                        <!-- 锁单后状态 -->
+                        <div id="locked-state-1" style="display: none;">
+                            <div class="btn-row">
+                                <button class="btn btn-primary btn-xs" onclick="showDetailsModal('USDT')">详情</button>
+                                <button class="btn btn-primary btn-xs" onclick="showModal('userDetailsModal')">会员详情</button>
+                            </div>
+                            <div class="btn-row">
+                                <button class="btn btn-primary btn-xs" onclick="openUnlockModal(1)">解锁单</button>
+                                <button class="btn btn-primary btn-xs" onclick="openUnlockModal(1)">管理员解锁单</button>
+                            </div>
+                            <div class="btn-row">
+                                <button class="btn btn-primary btn-xs" onclick="showModal('auditModal')">审核</button>
+                                <button class="btn btn-warning btn-xs" onclick="showModal('rejectModal')">拒绝</button>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                </td>
+            </tr>
+            
+            <!-- 行2：CNY(银行卡提现) + 代付中 -->
+            <tr>
+                <td>官方渠道</td>
+                <td>U20260821171604055649</td>
+                <td>102151987</td>
+                <td class="text-gray">否</td>
+                <td>149</td>
+                <td>1</td>
+                <td>148</td>
+                <td>148 CNY(银行卡提现)</td>
+                <td class="text-left">
+                    充值:27170.81<br>提现:15080.02<br>客损:12090.79
+                </td>
+                <td class="text-blue">代付中</td>
+                <td>2026-09-14 11:16:04<br>2026-09-14 11:24:28</td>
+                <td>
+                    <div style="display: flex; justify-content: space-between; align-items: center; min-width: 120px;">
+                        <span class="remark-text" style="color:#606266; font-size: 12px;">流水已达标</span>
+                        <button class="btn btn-primary btn-xs" onclick="openWithdrawRemarkModal(this)">修改</button>
+                    </div>
+                </td>
+                <td>sys_auto_01</td>
+                <td>
+                    <div class="operations-cell">
+                        <div class="btn-row">
+                            <button class="btn btn-primary btn-xs" onclick="showDetailsModal('银行卡')">详情</button>
+                            <button class="btn btn-primary btn-xs" onclick="showModal('userDetailsModal')">会员详情</button>
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn btn-primary btn-xs" onclick="showModal('unlockModal')">管理员解锁单</button>
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn btn-primary btn-xs" onclick="showModal('callbackModal')">手动回调</button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- 行3：CNY(支付宝提现) + 成功 -->
+            <tr>
+                <td>官方渠道</td>
+                <td>U20260821171604088990</td>
+                <td>102158821</td>
+                <td class="text-green">是</td>
+                <td>500</td>
+                <td>5</td>
+                <td>495</td>
+                <td>495 CNY(支付宝提现)</td>
+                <td class="text-left">
+                    充值:1000<br>提现:0<br>客损:1000
+                </td>
+                <td class="text-green">成功</td>
+                <td>2026-09-14 12:00:00<br>2026-09-14 12:05:10</td>
+                <td>
+                    <div style="display: flex; justify-content: space-between; align-items: center; min-width: 120px;">
+                        <span class="remark-text" style="color:#606266; font-size: 12px;"></span>
+                        <button class="btn btn-primary btn-xs" onclick="openWithdrawRemarkModal(this)">修改</button>
+                    </div>
+                </td>
+                <td>finance_lucy</td>
+                <td>
+                    <div class="operations-cell">
+                        <div class="btn-row">
+                            <button class="btn btn-primary btn-xs" onclick="showDetailsModal('钱包')">详情</button>
+                            <button class="btn btn-primary btn-xs" onclick="showModal('userDetailsModal')">会员详情</button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- 行4：VIPAY(钱包提现) + 代付成功 -->
+            <tr>
+                <td>代理渠道A</td>
+                <td>U20260821171604077654</td>
+                <td>102157732</td>
+                <td class="text-gray">否</td>
+                <td>1000</td>
+                <td>0</td>
+                <td>1000</td>
+                <td>1000 VIPAY(钱包提现)</td>
+                <td class="text-left">
+                    充值:8000<br>提现:2000<br>客损:6000
+                </td>
+                <td class="text-green">代付成功</td>
+                <td>2026-09-14 13:10:20<br>2026-09-14 13:12:45</td>
+                <td>
+                    <div style="display: flex; justify-content: space-between; align-items: center; min-width: 120px;">
+                        <span class="remark-text" style="color:#606266; font-size: 12px;"></span>
+                        <button class="btn btn-primary btn-xs" onclick="openWithdrawRemarkModal(this)">修改</button>
+                    </div>
+                </td>
+                <td>sys_auto_02</td>
+                <td>
+                    <div class="operations-cell">
+                        <div class="btn-row">
+                            <button class="btn btn-primary btn-xs" onclick="showDetailsModal('钱包')">详情</button>
+                            <button class="btn btn-primary btn-xs" onclick="showModal('userDetailsModal')">会员详情</button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- 行5：USDT + 失败 -->
+            <tr>
+                <td>官方渠道</td>
+                <td>U20260821171604066532</td>
+                <td>102156641</td>
+                <td class="text-gray">否</td>
+                <td>3000</td>
+                <td>0</td>
+                <td>3000</td>
+                <td>428.57 USDT</td>
+                <td class="text-left">
+                    充值:12000<br>提现:5000<br>客损:7000
+                </td>
+                <td class="text-red">失败</td>
+                <td>2026-09-14 14:20:15<br>2026-09-14 14:35:10</td>
+                <td>
+                    <div style="display: flex; justify-content: space-between; align-items: center; min-width: 120px;">
+                        <span class="remark-text" style="color:#606266; font-size: 12px;"></span>
+                        <button class="btn btn-primary btn-xs" onclick="openWithdrawRemarkModal(this)">修改</button>
+                    </div>
+                </td>
+                <td>risk_control_01</td>
+                <td>
+                    <div class="operations-cell">
+                        <div class="btn-row">
+                            <button class="btn btn-primary btn-xs" onclick="showDetailsModal('USDT')">详情</button>
+                            <button class="btn btn-primary btn-xs" onclick="showModal('userDetailsModal')">会员详情</button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- 行6：CNY(银行卡提现) + 代付失败 -->
+            <tr>
+                <td>代理渠道B</td>
+                <td>U20260821171604055421</td>
+                <td>102155510</td>
+                <td class="text-green">是</td>
+                <td>800</td>
+                <td>8</td>
+                <td>792</td>
+                <td>792 CNY(银行卡提现)</td>
+                <td class="text-left">
+                    充值:800<br>提现:0<br>客损:800
+                </td>
+                <td class="text-red">代付失败</td>
+                <td>2026-09-14 15:05:10<br>2026-09-14 15:08:22</td>
+                <td>
+                    <div style="display: flex; justify-content: space-between; align-items: center; min-width: 120px;">
+                        <span class="remark-text" style="color:#606266; font-size: 12px;"></span>
+                        <button class="btn btn-primary btn-xs" onclick="openWithdrawRemarkModal(this)">修改</button>
+                    </div>
+                </td>
+                <td>sys_auto_03</td>
+                <td>
+                    <div class="operations-cell">
+                        <!-- 锁单前（初始状态） -->
+                        <div id="unlocked-state-6" style="display: block;">
+                            <div class="btn-row">
+                                <button class="btn btn-primary btn-xs" onclick="showDetailsModal('银行卡')">详情</button>
+                                <button class="btn btn-primary btn-xs" onclick="showModal('userDetailsModal')">会员详情</button>
+                            </div>
+                            <div class="btn-row">
+                                <button class="btn btn-primary btn-xs" onclick="openLockModal(6)">锁单</button>
+                            </div>
+                        </div>
+                        <!-- 锁单后状态 -->
+                        <div id="locked-state-6" style="display: none;">
+                            <div class="btn-row">
+                                <button class="btn btn-primary btn-xs" onclick="showDetailsModal('银行卡')">详情</button>
+                                <button class="btn btn-primary btn-xs" onclick="showModal('userDetailsModal')">会员详情</button>
+                            </div>
+                            <div class="btn-row">
+                                <button class="btn btn-primary btn-xs" onclick="openUnlockModal(6)">解锁单</button>
+                                <button class="btn btn-primary btn-xs" onclick="openUnlockModal(6)">管理员解锁单</button>
+                            </div>
+                            <div class="btn-row">
+                                <button class="btn btn-primary btn-xs" onclick="showModal('auditModal')">审核</button>
+                                <button class="btn btn-warning btn-xs" onclick="showModal('rejectModal')">拒绝</button>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+
+    <!-- 底部翻页组件 -->
+    <div class="pagination-container">
+        <span>共 6 条</span>
+        <select class="page-select">
+            <option>50条/页</option>
+            <option>100条/页</option>
+            <option>200条/页</option>
+        </select>
+        <button class="page-btn">上一页</button>
+        <button class="page-btn">下一页</button>
+    </div>
+</div>
+
+<!-- 各种操作弹窗开始 -->
+<!-- 1. 确认锁单弹窗 -->
+<div id="lockModal" class="modal">
+    <div class="modal-content" style="width: 300px;">
+        <div class="modal-header">系统提示</div>
+        <div>确定要锁定该订单进行处理吗？</div>
+        <div class="modal-footer">
+            <button class="btn" onclick="closeModal('lockModal')">取消</button>
+            <button class="btn btn-primary" onclick="confirmLock()">确定</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. 确认解锁弹窗 -->
+<div id="unlockModal" class="modal">
+    <div class="modal-content" style="width: 300px;">
+        <div class="modal-header">系统提示</div>
+        <div>确定要解除该订单的锁定状态吗？</div>
+        <div class="modal-footer">
+            <button class="btn" onclick="closeModal('unlockModal')">取消</button>
+            <button class="btn btn-primary" onclick="confirmUnlock()">确定</button>
+        </div>
+    </div>
+</div>
+
+<!-- 3. 审核弹窗 -->
+<div id="auditModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">提现审核</div>
+        <div class="form-group">
+            <label>操作方式</label>
+            <div class="form-content">
+                <div class="radio-group">
+                    <label style="width:auto; margin:0;"><input type="radio" name="auditMethod" value="manual" checked onchange="toggleAuditMethod()"> 人工操作</label>
+                    <label style="width:auto; margin:0;"><input type="radio" name="auditMethod" value="auto" onchange="toggleAuditMethod()"> 代付操作</label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group" id="auditNameGroup" style="display: none;">
+            <label>名称</label>
+            <div class="form-content">
+                <select>
+                    <option value="">请选择代付通道</option>
+                    <optgroup label="USDT代付">
+                        <option value="西瓜代付-USDT">西瓜代付-USDT</option>
+                        <option value="HZ代付-USDT">HZ代付-USDT</option>
+                        <option value="币圣-USDT">币圣-USDT</option>
+                        <option value="OKpay-USDT">OKpay-USDT</option>
+                        <option value="ABpay-USDT">ABpay-USDT</option>
+                    </optgroup>
+                    <optgroup label="银行卡代付">
+                        <option value="银联快捷-银行卡">银联快捷-银行卡</option>
+                        <option value="易宝支付-银行卡">易宝支付-银行卡</option>
+                    </optgroup>
+                    <optgroup label="支付宝代付">
+                        <option value="极速付-支付宝">极速付-支付宝</option>
+                        <option value="阿里代付-支付宝">阿里代付-支付宝</option>
+                    </optgroup>
+                    <optgroup label="钱包代付">
+                        <option value="VipPay官方代付">VipPay官方代付</option>
+                        <option value="K豆官方代付">K豆官方代付</option>
+                    </optgroup>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>备注</label>
+            <div class="form-content">
+                <textarea placeholder="请输入审核备注"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" onclick="closeModal('auditModal')">取消</button>
+            <button class="btn btn-primary" onclick="closeModal('auditModal')">确认</button>
+        </div>
+    </div>
+</div>
+
+<!-- 4. 拒绝弹窗 -->
+<div id="rejectModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">拒绝提现</div>
+        <div class="form-group">
+            <label>拒绝原因</label>
+            <div class="form-content">
+                <textarea placeholder="请输入拒绝原因(必填)"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" onclick="closeModal('rejectModal')">取消</button>
+            <button class="btn btn-warning" onclick="closeModal('rejectModal')">确认拒绝</button>
+        </div>
+    </div>
+</div>
+<!-- 5. 出款详情弹窗 -->
+<div id="detailsModal" class="modal">
+    <div class="modal-content" style="width: 850px;">
+        <div class="modal-header" style="display: flex; justify-content: space-between;">出款详情 <span style="cursor:pointer; color:#909399;" onclick="closeModal('detailsModal')">✕</span></div>
+        <table class="detail-table" id="dynamicDetailsTable">
+            <!-- 里面的数据会通过JS动态插入 -->
+        </table>
+    </div>
+</div>
+
+<!-- 6. 会员详情弹窗 (参考附件二全新布局)[cite: 2] -->
+<div id="userDetailsModal" class="modal">
+    <div class="modal-content" style="width: 950px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header" style="display: flex; justify-content: space-between; font-size: 15px;">
+            <span style="font-weight: bold;">概况</span>
+            <span style="cursor:pointer; color: #999;" onclick="closeModal('userDetailsModal')">✕</span>
+        </div>
+        <div class="modal-body" style="padding: 20px 30px;">
+            <div class="form-grid">
+                <div class="form-group-detail"><label class="form-label-detail">用户ID：</label><input type="text" class="modal-input-detail" value="93657339" disabled></div>
+                <div class="form-group-detail"><label class="form-label-detail">用户昵称：</label><input type="text" class="modal-input-detail" value="无家可归aegp" disabled></div>
+                <div class="form-group-detail"><label class="form-label-detail">真实姓名：</label><input type="text" class="modal-input-detail" value="喜欢123" disabled></div>
+                
+                <div class="form-group-detail"><label class="form-label-detail">直属上级：</label><input type="text" class="modal-input-detail" value="上级ID:0" disabled></div>
+                <div class="form-group-detail"><label class="form-label-detail">区号：</label><input type="text" class="modal-input-detail" value="+86" disabled></div>
+                <div class="form-group-detail"><label class="form-label-detail">手机号：</label><input type="text" class="modal-input-detail" value="18707594013" disabled></div>
+                
+                <div class="form-group-detail"><label class="form-label-detail">用户层级：</label><input type="text" class="modal-input-detail" value="默认层级 0-500可见" disabled></div>
+                <div class="form-group-detail"><label class="form-label-detail">余额：</label><input type="text" class="modal-input-detail" value="0.1" disabled></div>
+                <div class="form-group-detail"><label class="form-label-detail">账号状态：</label><input type="text" class="modal-input-detail" value="启用" disabled></div>
+
+                <div class="form-group-detail"><label class="form-label-detail">历史游戏盈亏：</label><input type="text" class="modal-input-detail" value="17480" disabled></div>
+                <div class="form-group-detail"><label class="form-label-detail">累计有效投注：</label><input type="text" class="modal-input-detail" value="85080" disabled></div>
+                <div class="form-group-detail"><label class="form-label-detail">总充值：</label><input type="text" class="modal-input-detail" value="10000" disabled></div>
+                
+                <div class="form-group-detail"><label class="form-label-detail">总提现：</label><input type="text" class="modal-input-detail" value="0" disabled></div>
+                <div class="form-group-detail"><label class="form-label-detail">累计彩金：</label><input type="text" class="modal-input-detail" value="0" disabled></div>
+                <div class="form-group-detail"><label class="form-label-detail">群发红包限额：</label><input type="text" class="modal-input-detail" value="1000" disabled></div>
+                
+                <div class="form-group-detail"><label class="form-label-detail">充值等级：</label><input type="text" class="modal-input-detail" value="充值等级:0" disabled></div>
+
+                <div class="form-group-detail" style="grid-column: 1 / -1; margin-top: 5px;">
+                    <label class="form-label-detail">备注：</label>
+                    <input type="text" class="modal-input-detail" value="这是一个大客户，请多关注。" disabled style="padding: 10px 12px;">
+                </div>
+
+                <div class="form-group-detail" style="grid-column: 1 / -1;">
+                    <label class="form-label-detail">注册设备码：</label>
+                    <input type="text" class="modal-input-detail" value="950264cf-3aea-42f8-9a37-2737c0eebb32（共1个账户）" disabled>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <div class="stats-tabs">
+                    <div class="stats-tab active" onclick="switchTab(this)">今日</div>
+                    <div class="stats-tab" onclick="switchTab(this)">昨日</div>
+                    <div class="stats-tab" onclick="switchTab(this)">本月</div>
+                    <div class="stats-tab" onclick="switchTab(this)">上月</div>
+                </div>
+                <div class="stats-content">
+                    <table class="stats-table">
+                        <tr><td class="stats-label">有效投注</td><td class="stats-value">85080</td></tr>
+                        <tr><td class="stats-label">游戏盈亏</td><td class="stats-value">17480</td></tr>
+                        <tr>
+                            <td class="stats-label">充值</td>
+                            <td class="stats-value">2次/5000 
+                                <div class="tooltip-box"><a href="javascript:void(0);" style="color:#409eff; text-decoration:none;">明细</a>
+                                <span class="tooltip-text">跳转线上入款页面，并筛选该会员、该时段</span></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="stats-label">提现</td>
+                            <td class="stats-value">0次/0 
+                                <div class="tooltip-box"><a href="javascript:void(0);" style="color:#409eff; text-decoration:none;">明细</a>
+                                <span class="tooltip-text">跳转提现列表页面，并筛选该会员、该时段</span></div>
+                            </td>
+                        </tr>
+                        <tr><td class="stats-label">提充客损</td><td class="stats-value">5000</td></tr>
+                        <tr><td class="stats-label">总打赏金额</td><td class="stats-value">500</td></tr>
+                        <tr><td class="stats-label">总消费下单金额</td><td class="stats-value">1000</td></tr>
+                        <tr><td class="stats-label">优惠赠送</td><td class="stats-value" style="border-bottom:none;">活动赠送0</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="border-top:1px solid #ebeef5; padding-top:15px; margin-top:10px;">
+            <button class="btn btn-primary" onclick="closeModal('userDetailsModal')">刷新</button>
+            <button class="btn" onclick="closeModal('userDetailsModal')">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- 8. 修改提现备注弹窗 -->
+<div id="withdrawRemarkModal" class="modal">
+    <div class="modal-content" style="width: 450px;">
+        <div class="modal-header" style="display: flex; justify-content: space-between; border-bottom: 1px solid #ebeef5; padding-bottom: 15px; margin-bottom: 20px;">
+            <span>修改提现备注</span>
+            <span style="cursor:pointer; color:#909399;" onclick="closeModal('withdrawRemarkModal')">✕</span>
+        </div>
+        
+        <div class="form-group" style="align-items: flex-start;">
+            <label style="width: 70px; margin-top: 5px;"><span style="color:#f56c6c; margin-right:4px;">*</span>备注:</label>
+            <div class="form-content">
+                <textarea id="withdrawRemarkInput" placeholder="请输入备注" style="height: 100px;"></textarea>
+            </div>
+        </div>
+        
+        <div class="modal-footer" style="padding-top:15px; margin-top:10px;">
+            <button class="btn" onclick="closeModal('withdrawRemarkModal')">取消</button>
+            <button class="btn btn-primary" onclick="saveWithdrawRemark()">提交</button>
+        </div>
+    </div>
+</div>
+
+<!-- 7. 手动回调弹窗 -->
+<div id="callbackModal" class="modal">
+    <div class="modal-content" style="width: 450px;">
+        <div class="modal-header" style="display: flex; justify-content: space-between;">确定要手动回调吗？ <span style="cursor:pointer; color:#909399;" onclick="closeModal('callbackModal')">✕</span></div>
+        
+        <div class="form-group" style="align-items: center;">
+            <label style="width: 100px;"><span style="color:#f56c6c; margin-right:4px;">*</span>状态:</label>
+            <div class="form-content">
+                <select style="height: 32px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 10px;">
+                    <option value="">请选择方式</option>
+                    <option value="success">成功</option>
+                    <option value="fail">失败</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-group" style="align-items: center;">
+            <label style="width: 100px;"><span style="color:#f56c6c; margin-right:4px;">*</span>二级密码:</label>
+            <div class="form-content">
+                <input type="password" placeholder="请输入二级密码" style="height: 32px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 10px; width: 100%; box-sizing: border-box;">
+            </div>
+        </div>
+        
+        <div class="form-group" style="align-items: center;">
+            <label style="width: 100px;"><span style="color:#f56c6c; margin-right:4px;">*</span>谷歌验证码:</label>
+            <div class="form-content">
+                <input type="text" placeholder="请输入谷歌验证码" style="height: 32px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 10px; width: 100%; box-sizing: border-box;">
+            </div>
+        </div>
+        
+        <div class="form-group" style="align-items: center;">
+            <label style="width: 100px;"><span style="color:#f56c6c; margin-right:4px;">*</span>备注:</label>
+            <div class="form-content">
+                <input type="text" placeholder="请输入备注" style="height: 32px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 10px; width: 100%; box-sizing: border-box;">
+            </div>
+        </div>
+        
+        <div class="modal-footer" style="border-top:1px solid #ebeef5; padding-top:15px; margin-top:20px;">
+            <button class="btn" onclick="closeModal('callbackModal')">取消</button>
+            <button class="btn btn-primary" onclick="closeModal('callbackModal')">同意</button>
+        </div>
+    </div>
+</div>
+
+<!-- 弹窗结束 -->
+
+<script>
+    // 打开弹窗
+    function showModal(modalId) {
+        document.getElementById(modalId).style.display = 'block';
+    }
+
+    // 关闭弹窗
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // 新增：记录当前正在操作的是哪一行
+    var currentRowId = 1; 
+
+    function openLockModal(id) {
+        currentRowId = id;
+        showModal('lockModal');
+    }
+
+    function openUnlockModal(id) {
+        currentRowId = id;
+        showModal('unlockModal');
+    }
+
+    // 更新：确认锁单逻辑（支持多行）
+    function confirmLock() {
+        document.getElementById('unlocked-state-' + currentRowId).style.display = 'none';
+        document.getElementById('locked-state-' + currentRowId).style.display = 'block';
+        closeModal('lockModal');
+    }
+
+    // 更新：确认解锁逻辑（支持多行）
+    function confirmUnlock() {
+        document.getElementById('locked-state-' + currentRowId).style.display = 'none';
+        document.getElementById('unlocked-state-' + currentRowId).style.display = 'block';
+        closeModal('unlockModal');
+    }
+
+    // 审核弹窗：切换操作方式时的字段联动
+    function toggleAuditMethod() {
+        var method = document.querySelector('input[name="auditMethod"]:checked').value;
+        var nameGroup = document.getElementById('auditNameGroup');
+        
+        if (method === 'auto') {
+            nameGroup.style.display = 'flex'; // 代付操作显示“名称”下拉框
+        } else {
+            nameGroup.style.display = 'none'; // 人工操作隐藏
+        }
+    }
+// 打开详情弹窗并根据提现方式动态渲染数据
+    function showDetailsModal(type) {
+        var tableContent = '';
+        if (type === 'USDT') {
+            tableContent = `
+                <tr><th>会员ID</th><td>102154884</td><th>订单号</th><td>U20260821182436014545</td><th>会员层级</th><td>默认层级</td><th>申请日期</th><td>2026-09-14 10:24:36</td></tr>
+                <tr><th>USDT地址</th><td colspan="3">TYx...USDTaddress...89Q</td><th>协议网络</th><td colspan="3">TRC20</td></tr>
+                <tr><th>取款金额</th><td colspan="3">2026 CNY</td><th>手续费</th><td colspan="3">0 CNY</td></tr>
+                <tr><th>到账金额</th><td colspan="7">294.47 USDT</td></tr>
+                <tr><th>用户备注</th><td colspan="7"></td></tr>
+                <tr><th>提现备注</th><td colspan="7"></td></tr>
+                <tr><th>审核备注</th><td colspan="7"></td></tr>
+                <tr><th>状态</th><td colspan="7">申请中</td></tr>
+            `;
+        } else if (type === '银行卡') {
+            tableContent = `
+                <tr><th>会员ID</th><td>102151987</td><th>订单号</th><td>U20260821171604055649</td><th>会员层级</th><td>渠道1默认层级</td><th>申请日期</th><td>2026-09-14 11:16:04</td></tr>
+                <tr><th>银行卡号</th><td colspan="3">6222020202020202020</td><th>所属银行</th><td colspan="3">中国工商银行</td></tr>
+                <tr><th>开户姓名</th><td colspan="3">张三</td><th>开户网点</th><td colspan="3">北京朝阳支行</td></tr>
+                <tr><th>取款金额</th><td colspan="3">149 CNY</td><th>手续费</th><td colspan="3">1 CNY</td></tr>
+                <tr><th>到账金额</th><td colspan="7">148 CNY (银行卡提现)</td></tr>
+                <tr><th>用户备注</th><td colspan="7"></td></tr>
+                <tr><th>提现备注</th><td colspan="7"></td></tr>
+                <tr><th>审核备注</th><td colspan="7"></td></tr>
+                <tr><th>状态</th><td colspan="7">代付中</td></tr>
+            `;
+        } else {
+            // 默认展示钱包/VipPay样式 (对应原型图)
+            tableContent = `
+                <tr><th>会员ID</th><td>100041536</td><th>订单号</th><td>U20260825203757021973</td><th>会员层级</th><td>总后台默认层级 0-500可见</td><th>申请日期</th><td>2026-08-25 20:37:57</td></tr>
+                <tr><th>收款地址</th><td colspan="3">8623366f94086329b3332c8e1408541c</td><th>提现钱包</th><td colspan="3">VipPay</td></tr>
+                <tr><th>取款金额</th><td colspan="3">66</td><th>手续费</th><td colspan="3">0</td></tr>
+                <tr><th>到账金额</th><td colspan="7">66 VIPPAY</td></tr>
+                <tr><th>用户备注</th><td colspan="7"></td></tr>
+                <tr><th>提现备注</th><td colspan="7"></td></tr>
+                <tr><th>审核备注</th><td colspan="7"></td></tr>
+                <tr><th>状态</th><td colspan="7">申请中</td></tr>
+            `;
+        }
+        document.getElementById('dynamicDetailsTable').innerHTML = tableContent;
+        showModal('detailsModal');
+    }
+
+// 提现备注修改交互逻辑
+    var currentRemarkSpan = null; 
+
+    function openWithdrawRemarkModal(btnElement) {
+        // 找到该按钮前面的文字 span
+        currentRemarkSpan = btnElement.previousElementSibling;
+        // 把当前文字填入弹窗里的输入框
+        document.getElementById('withdrawRemarkInput').value = currentRemarkSpan.innerText;
+        showModal('withdrawRemarkModal');
+    }
+
+    function saveWithdrawRemark() {
+        if (currentRemarkSpan) {
+            // 将输入框的文字保存回表格中
+            currentRemarkSpan.innerText = document.getElementById('withdrawRemarkInput').value;
+        }
+        closeModal('withdrawRemarkModal');
+    }
+
+    // 会员详情弹窗：左侧统计Tab切换逻辑
+    function switchTab(clickedElement) {
+        const allTabs = clickedElement.parentElement.querySelectorAll('.stats-tab');
+        allTabs.forEach(tab => tab.classList.remove('active'));
+        clickedElement.classList.add('active');
+    }
+
+</script>
+
+</body>
+</html>
