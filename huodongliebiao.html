@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>活动列表页</title>
+<style>
+  /* 基础重置 */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  ul, li { list-style: none; }
+  
+  /* 隐藏滚动条 */
+  ::-webkit-scrollbar { display: none; }
+
+  /* 核心 375 * 812 容器 */
+  .app-container {
+    width: 375px;
+    height: 812px;
+    background-color: #f5f6f8;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* --- 顶部导航栏 --- */
+  .top-header {
+    height: 50px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    position: relative;
+    z-index: 100;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+  .back-btn { font-size: 20px; color: #666; font-weight: bold; width: 30px; }
+  
+  .nav-tabs {
+    flex: 1;
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-right: 30px; /* 给搜索留位置 */
+  }
+  .nav-tabs span {
+    font-size: 15px;
+    color: #333;
+    margin-right: 20px;
+    position: relative;
+    padding-bottom: 5px;
+  }
+  .nav-tabs span.active {
+    color: #e53935;
+    font-weight: bold;
+    border-bottom: 3px solid #e53935;
+  }
+  .nav-tabs span::after {
+    content: "1";
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    background: #e53935;
+    color: #fff;
+    font-size: 10px;
+    padding: 1px 4px;
+    border-radius: 10px;
+    border: 1px solid #fff;
+  }
+
+  /* 搜索功能区 */
+  .search-wrapper {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  .search-icon {
+    font-size: 20px;
+    color: #666;
+    cursor: pointer;
+    z-index: 2;
+  }
+  .search-input-box {
+    position: absolute;
+    right: 0;
+    width: 0;
+    height: 34px;
+    background: #f0f0f0;
+    border-radius: 17px;
+    overflow: hidden;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    opacity: 0;
+  }
+  .search-input-box.show {
+    width: 250px; /* 展开宽度 */
+    opacity: 1;
+  }
+  .search-input-box input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    padding: 0 15px;
+    font-size: 14px;
+  }
+
+  /* --- 中间主内容区 --- */
+  .main-content {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* 左侧菜单 */
+  .side-menu {
+    width: 85px;
+    background: #fff;
+    height: 100%;
+    overflow-y: auto;
+    border-right: 1px solid #eee;
+    padding-bottom: 20px;
+  }
+  .menu-item {
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #666;
+    border-bottom: 1px solid #f5f5f5;
+    position: relative;
+    cursor: pointer;
+  }
+  
+  /* 🔥 1. 热门菜单 特殊样式 & 动效 */
+  .menu-item.hot {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    color: #d84315;
+    font-weight: 800;
+    font-size: 15px;
+    position: relative;
+    overflow: hidden;
+    animation: hotPulse 2s infinite;
+  }
+  .menu-item.hot .icon {
+    margin-right: 4px;
+    animation: flameDance 0.8s infinite alternate;
+  }
+  .menu-item.hot.active {
+    background: linear-gradient(90deg, #ff5722, #ff9800);
+    color: #fff;
+    box-shadow: 2px 2px 10px rgba(255, 87, 34, 0.3);
+  }
+  
+  .menu-item.active:not(.hot) {
+    color: #1976d2;
+    font-weight: bold;
+    background: #f5f6f8;
+  }
+  .menu-item.active:not(.hot)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: #1976d2;
+  }
+  
+  /* 左侧底部固定按钮 */
+  .side-btn-group {
+    padding: 10px;
+  }
+  .side-btn {
+    width: 100%;
+    padding: 8px 0;
+    font-size: 12px;
+    border-radius: 4px;
+    text-align: center;
+    margin-bottom: 8px;
+    cursor: pointer;
+  }
+  .side-btn.blue { background: #1976d2; color: #fff; border: none; }
+  .side-btn.outline { background: #fff; color: #1976d2; border: 1px solid #1976d2; }
+
+  /* 右侧内容区 */
+  .content-panel {
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  /* 🔥 2. Banner 轮播区域 */
+  .banner-slider {
+    width: 100%;
+    height: 110px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(45deg, #673ab7, #9c27b0);
+    margin-bottom: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  .banner-content {
+    display: flex;
+    width: 300%;
+    height: 100%;
+    animation: bannerSlide 9s infinite;
+  }
+  .banner-item {
+    width: 33.33%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 20px;
+    font-weight: bold;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+  }
+  .banner-item:nth-child(1) { background: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop') center/cover; }
+  .banner-item:nth-child(2) { background: url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=600&auto=format&fit=crop') center/cover; }
+  .banner-item:nth-child(3) { background: url('https://images.unsplash.com/photo-1614030126538-4e8c56cc7711?q=80&w=600&auto=format&fit=crop') center/cover; }
+
+  /* 🔥 3. 跑马灯区域 */
+  .marquee-bar {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 20px;
+    padding: 4px 4px 4px 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+  .marquee-icon { font-size: 16px; margin-right: 6px; }
+  .marquee-container {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    height: 20px;
+  }
+  .marquee-text {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marqueeScroll 10s linear infinite;
+    font-size: 12px;
+    color: #d32f2f;
+    line-height: 20px;
+  }
+  .join-btn {
+    background: linear-gradient(90deg, #ff7043, #ff3d00);
+    color: #fff;
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 15px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(255, 61, 0, 0.3);
+  }
+
+  /* 活动卡片列表 */
+  .activity-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .card-img {
+    height: 100px;
+    background: #e0e0e0;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-img-inner {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #cfd9df, #e2ebf0);
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    color: #888;
+  }
+  
+  /* 🔥 4. 活动标签 (悬浮在图片上) */
+  .card-tags {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .tag {
+    font-size: 10px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    color: #fff;
+    font-weight: bold;
+  }
+  .tag.progress { background: rgba(229, 57, 53, 0.9); border: 1px solid #b71c1c; }
+  .tag.popular { background: rgba(255, 152, 0, 0.9); }
+  .tag.recommend { background: rgba(156, 39, 176, 0.9); }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 4px;
+  }
+  .card-desc {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .card-time {
+    font-size: 11px;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    border-top: 1px dashed #eee;
+    padding-top: 8px;
+  }
+  .card-time::before { content: "🕒"; margin-right: 4px; }
+
+  /* --- 底部 Tab 栏 --- */
+  .bottom-nav {
+    height: 50px;
+    background: #fff;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #888;
+    font-size: 11px;
+    position: relative;
+  }
+  .tab-item i { font-size: 20px; margin-bottom: 2px; }
+  .tab-item.active { color: #1976d2; }
+  .badge {
+    position: absolute;
+    top: -2px; right: -8px;
+    background: #e53935; color: #fff;
+    font-size: 9px; padding: 1px 4px;
+    border-radius: 10px;
+  }
+
+  /* 动画 Keyframes */
+  @keyframes bannerSlide {
+    0%, 25% { transform: translateX(0); }
+    33%, 58% { transform: translateX(-33.33%); }
+    66%, 91% { transform: translateX(-66.66%); }
+    100% { transform: translateX(0); }
+  }
+  @keyframes marqueeScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-150%); }
+  }
+  @keyframes hotPulse {
+    0% { background-color: #fff3e0; }
+    50% { background-color: #ffe0b2; }
+    100% { background-color: #fff3e0; }
+  }
+  @keyframes flameDance {
+    0% { transform: scale(1) rotate(-5deg); }
+    100% { transform: scale(1.15) rotate(5deg); }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  
+  <!-- 1. 顶部导航区 -->
+  <header class="top-header">
+    <div class="back-btn">&lt;</div>
+    <div class="nav-tabs">
+      <span class="active">活动</span>
+      <span>任务</span>
+      <span>信用借款</span>
+      <span>幸运转盘</span>
+    </div>
+    
+    <!-- 搜索功能 (点击展开) -->
+    <div class="search-wrapper">
+      <div class="search-input-box" id="searchInputBox">
+        <input type="text" placeholder="请输入活动名称搜索...">
+      </div>
+      <div class="search-icon" id="searchBtn">🔍</div>
+    </div>
+  </header>
+
+  <!-- 2. 中间主区域 -->
+  <main class="main-content">
+    
+    <!-- 左侧菜单 -->
+    <aside class="side-menu">
+      <!-- 热门菜单 (动画+醒目) -->
+      <div class="menu-item hot active"><span class="icon">🔥</span>热门</div>
+      
+      <div class="menu-item">综合</div>
+      <div class="menu-item">棋牌</div>
+      <div class="menu-item">电子</div>
+      <div class="menu-item">捕鱼</div>
+      <div class="menu-item">真人</div>
+      <div class="menu-item">体育</div>
+      <div class="menu-item">彩票</div>
+      <div class="menu-item">其他</div>
+
+      <div class="side-btn-group">
+        <button class="side-btn blue">领取记录</button>
+        <button class="side-btn outline">↻ 刷新奖励</button>
+      </div>
+    </aside>
+
+    <!-- 右侧内容 -->
+    <section class="content-panel">
+      
+      <!-- Banner 轮播 (替代原搜索框位置) -->
+      <div class="banner-slider">
+        <div class="banner-content">
+          <div class="banner-item">周末充值狂欢节</div>
+          <div class="banner-item">新人首充双倍</div>
+          <div class="banner-item">VIP专属特权月</div>
+        </div>
+      </div>
+
+      <!-- 跑马灯领奖记录 -->
+      <div class="marquee-bar">
+        <span class="marquee-icon">📢</span>
+        <div class="marquee-container">
+          <span class="marquee-text">恭喜用户 vip***8 刚刚领取了 888元 惊喜彩金！ | 恭喜用户 aa***2 成功提现 5000元！ | 恭喜用户 bb***9 参与抽奖获得iPhone 15！</span>
+        </div>
+        <button class="join-btn">参与活动</button>
+      </div>
+
+      <!-- 活动卡片列表 (热门栏目自带特殊标签) -->
+      <div class="activity-cards">
+        
+        <!-- 卡片 1 -->
+        <div class="activity-card">
+          <div class="card-img">
+            <div class="card-img-inner">充值优惠券活动</div>
+            <div class="card-tags">
+              <span class="tag progress">领奖进度已完成89%</span>
+              <span class="tag recommend">猜你喜欢</span>
+            </div>
+          </div>
+          <div class="card-title">充值优惠券活动 (最多2行展示)</div>
+          <div class="card-desc">活动简介，充值即送高额返水，多充多送，奖励不设上限，马上参与获取最高福利。</div>
+          <div class="card-time">2023-08-01 00:00:00 — 2024-12-31 23:59:59</div>
+        </div>
+
+        <!-- 卡片 2 -->
+        <div class="activity-card">
+          <div class="card-img">
+            <div class="card-img-inner">全民砍一刀</div>
+            <div class="card-tags">
+              <span class="tag popular">99%用户已参与</span>
+            </div>
+          </div>
+          <div class="card-title">砍一刀活动 (限时参与)</div>
+          <div class="card-desc">邀请好友助力砍一刀，最高可免费提现888元，人数越多成功率越高！</div>
+          <div class="card-time">2023-08-01 00:00:00 — 2024-12-31 23:59:59</div>
+        </div>
+
+        <!-- 卡片 3 -->
+        <div class="activity-card">
+          <div class="card-img">
+            <div class="card-img-inner">抽奖助力</div>
+            <div class="card-tags">
+              <span class="tag progress">进度 50%</span>
+            </div>
+          </div>
+          <div class="card-title">渠道抽奖活动</div>
+          <div class="card-desc">每日登录即送抽奖次数，百分百中奖，最高保底送奔驰大G使用权一年。</div>
+          <div class="card-time">2023-08-01 00:00:00 — 2024-12-31 23:59:59</div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- 3. 底部导航区 -->
+  <footer class="bottom-nav">
+    <div class="tab-item">
+      <i>🎮</i>
+      <span>首页</span>
+    </div>
+    <div class="tab-item active">
+      <i>🎁</i>
+      <span>优惠</span>
+      <span class="badge">99+</span>
+    </div>
+    <div class="tab-item">
+      <i>💰</i>
+      <span>充值</span>
+    </div>
+    <div class="tab-item">
+      <i>💳</i>
+      <span>提现</span>
+    </div>
+    <div class="tab-item">
+      <i>👤</i>
+      <span>我的</span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // 1. 搜索框展开/收起逻辑
+  const searchBtn = document.getElementById('searchBtn');
+  const searchInputBox = document.getElementById('searchInputBox');
+  let isSearchOpen = false;
+
+  searchBtn.addEventListener('click', () => {
+    isSearchOpen = !isSearchOpen;
+    if(isSearchOpen) {
+      searchInputBox.classList.add('show');
+      searchBtn.style.color = "#e53935"; // 改变图标颜色表示激活态
+      // 聚焦输入框
+      setTimeout(() => {
+        searchInputBox.querySelector('input').focus();
+      }, 300);
+    } else {
+      searchInputBox.classList.remove('show');
+      searchBtn.style.color = "#666";
+    }
+  });
+
+  // 2. 左侧菜单点击切换逻辑
+  const menuItems = document.querySelectorAll('.side-menu .menu-item');
+  menuItems.forEach(item => {
+    item.addEventListener('click', function() {
+      // 移除所有active
+      menuItems.forEach(i => i.classList.remove('active'));
+      // 为当前点击项添加active
+      this.classList.add('active');
+      
+      // 此处可扩展 AJAX 加载不同分类的数据逻辑
+      // console.log("切换到了分类: " + this.innerText);
+    });
+  });
+</script>
+
+</body>
+</html>
