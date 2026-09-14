@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<!-- 针对移动端视口设置 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>实名认证领彩金原型</title>
+<style>
+  /* 基础重置与容器居中（为了在电脑端预览也能保持375x812比例） */
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  /* 核心 375 * 812 容器 */
+  .app-container {
+    width: 375px;
+    height: 812px;
+    background: url('https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat; /* 模拟一个底层的页面背景 */
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  }
+
+  /* 全屏黑色半透明蒙层 */
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* 弹窗通用样式 */
+  .modal {
+    width: 310px;
+    background: linear-gradient(145deg, #ffffff, #ffebeb);
+    border-radius: 20px;
+    padding: 30px 20px;
+    box-sizing: border-box;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+  }
+
+  /* 隐藏类 */
+  .hidden {
+    display: none !important;
+  }
+
+  /* 图标动效 */
+  .gift-icon {
+    font-size: 64px;
+    margin-bottom: 10px;
+    animation: bounce 2s infinite ease-in-out;
+  }
+
+  .title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #d32f2f;
+    margin: 0 0 10px 0;
+  }
+
+  .desc {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  /* 金额展示 */
+  .amount-box {
+    margin: 15px 0;
+  }
+  .amount {
+    font-size: 56px;
+    font-weight: 900;
+    color: #f44336;
+    text-shadow: 0px 4px 10px rgba(244, 67, 54, 0.3);
+  }
+  .amount::before {
+    content: "￥";
+    font-size: 24px;
+    margin-right: 2px;
+  }
+
+  /* 倒计时样式 */
+  .countdown {
+    background: #ffeb3b;
+    color: #e65100;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 16px;
+    font-weight: bold;
+    display: inline-block;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .countdown span {
+    color: #d32f2f;
+    font-size: 18px;
+    margin: 0 4px;
+  }
+
+  /* 醒目的主按钮 */
+  .btn-primary {
+    background: linear-gradient(90deg, #ff9800, #ff3d00);
+    color: #fff;
+    border: none;
+    width: 100%;
+    padding: 16px 0;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(255, 61, 0, 0.4);
+    animation: pulse 1.5s infinite;
+  }
+
+  /* 弱化的关闭按钮 */
+  .btn-close {
+    margin-top: 15px;
+    background: transparent;
+    border: none;
+    color: #aaa;
+    font-size: 13px;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 10px;
+  }
+
+  /* 宝箱动效相关 */
+  .chest-box {
+    font-size: 80px;
+    margin: 30px 0;
+  }
+  .shake {
+    animation: shake 0.5s infinite;
+  }
+  .chest-opening-text {
+    font-size: 18px;
+    font-weight: bold;
+    color: #e65100;
+    margin-bottom: 20px;
+    animation: blink 1s infinite;
+  }
+
+  /* Keyframes 动画 */
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  @keyframes shake {
+    0% { transform: translate(2px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-2deg); }
+    20% { transform: translate(-3px, 0px) rotate(2deg); }
+    30% { transform: translate(0px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(2deg); }
+    50% { transform: translate(-1px, 2px) rotate(-2deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(2px, 1px) rotate(-2deg); }
+    80% { transform: translate(-1px, -1px) rotate(2deg); }
+    90% { transform: translate(2px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-2deg); }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <div class="overlay">
+    
+    <!-- 模态框 1：主福利领取 -->
+    <div id="modal-1" class="modal">
+      <div class="gift-icon">🎁</div>
+      <h2 class="title">完成实名认证领彩金</h2>
+      <p class="desc">您的专属福利已到账，完成认证即可提现使用！奖励即将失效，请尽快领取。</p>
+      
+      <div class="countdown">
+        距失效还剩 <span id="timer-1">15:00</span>
+      </div>
+
+      <div class="amount-box">
+        <div class="amount">88</div>
+      </div>
+
+      <button class="btn-primary" onclick="alert('跳转实名认证页面...')">立即验证</button>
+      <button class="btn-close" id="btn-close-1">暂不需要，放弃奖励</button>
+    </div>
+
+    <!-- 模态框 2：二次确认挽留 / 宝箱抽奖 -->
+    <div id="modal-2" class="modal hidden">
+      <!-- 抽奖动效区域 -->
+      <div id="animation-area">
+        <div class="title">等等！送您一次开宝箱机会</div>
+        <div class="chest-box shake">🧰</div>
+        <div class="chest-opening-text">正在为您抽取隐藏彩金...</div>
+      </div>
+
+      <!-- 开奖后内容区域（默认隐藏） -->
+      <div id="result-area" class="hidden">
+        <div class="gift-icon">🎉</div>
+        <h2 class="title">人品爆发！彩金升级</h2>
+        <p class="desc">恭喜您开出额外惊喜奖励！<br>请在 <strong style="color:#d32f2f">5分钟</strong> 内完成认证领取！</p>
+        
+        <div class="countdown">
+          距失效还剩 <span id="timer-2">05:00</span>
+        </div>
+
+        <div class="amount-box">
+          <div class="amount" id="final-amount">88</div>
+        </div>
+
+        <button class="btn-primary" onclick="alert('跳转实名认证页面...')">立即验证</button>
+        <button class="btn-close" onclick="alert('彻底关闭弹窗'); document.querySelector('.overlay').style.display='none';">残忍离开</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let currentTimerInterval = null;
+
+  /**
+   * 通用倒计时函数
+   * @param {number} minutes 分钟数
+   * @param {string} elementId 显示时间的DOM ID
+   * @param {boolean} loop 是否在倒计时归零后循环
+   */
+  function startCountdown(minutes, elementId, loop = false) {
+    clearInterval(currentTimerInterval);
+    let timeInSeconds = minutes * 60;
+    const displayElement = document.getElementById(elementId);
+
+    function updateDisplay() {
+      let m = parseInt(timeInSeconds / 60, 10);
+      let s = parseInt(timeInSeconds % 60, 10);
+      m = m < 10 ? "0" + m : m;
+      s = s < 10 ? "0" + s : s;
+      displayElement.textContent = m + ":" + s;
+    }
+
+    updateDisplay(); // 立即初始化一次显示
+
+    currentTimerInterval = setInterval(() => {
+      timeInSeconds--;
+      if (timeInSeconds < 0) {
+        if (loop) {
+          timeInSeconds = minutes * 60; // 重新计时
+        } else {
+          timeInSeconds = 0;
+          clearInterval(currentTimerInterval);
+        }
+      }
+      updateDisplay();
+    }, 1000);
+  }
+
+  // 初始化模态框1的15分钟倒计时（设为true表示循环）
+  startCountdown(15, 'timer-1', true);
+
+  // 绑定主弹窗关闭按钮逻辑
+  document.getElementById('btn-close-1').addEventListener('click', () => {
+    // 隐藏主弹窗，显示二次挽留弹窗
+    document.getElementById('modal-1').classList.add('hidden');
+    document.getElementById('modal-2').classList.remove('hidden');
+
+    // 此时显示的是宝箱震动动画，3秒后切换到开奖结果
+    setTimeout(() => {
+      // 隐藏动画区，显示结果区
+      document.getElementById('animation-area').classList.add('hidden');
+      document.getElementById('result-area').classList.remove('hidden');
+
+      // 计算随机增加的彩金金额 (0 ~ 30)
+      const baseAmount = 88;
+      const extraAmount = Math.floor(Math.random() * 31); // 0到30
+      const totalAmount = baseAmount + extraAmount;
+
+      // 让数字有一个简单的增长效果
+      let currentDisplayAmount = baseAmount;
+      const amountElement = document.getElementById('final-amount');
+      
+      const countUpInterval = setInterval(() => {
+        if(currentDisplayAmount < totalAmount) {
+          currentDisplayAmount++;
+          amountElement.textContent = currentDisplayAmount;
+        } else {
+          clearInterval(countUpInterval);
+        }
+      }, 50); // 动效时长约控制在50ms/跳
+
+      // 开启新的5分钟倒计时（要求5分钟内有效，同样给予循环保持急迫感）
+      startCountdown(5, 'timer-2', true);
+
+    }, 3000); // 3秒宝箱震动
+  });
+</script>
+
+</body>
+</html>
